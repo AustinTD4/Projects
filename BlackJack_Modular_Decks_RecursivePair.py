@@ -39,7 +39,7 @@ class black_jack_colorless:
         self.deck_stack, self.hands = [], []
         self.moves = ["Stay","Hit","Double","Split"]
         self.dealer_total, self.player_total, self.script, self.script2 = None, None, None, None
-        self.correct, self.count, self.deck_count, self.deck_num, self.multi_split = 0, 0, 0, 0, 0
+        self.correct, self.count, self.deck_count, self.multi_split = 0, 0, 0, 0
         self.active = True
         
     def read_string(self, input_string):
@@ -410,6 +410,7 @@ class black_jack_colorless:
         self.run(False)
                 
     def run(self, first=True):
+        self.deck_num = False
         if first == True:
             init(autoreset=True)
             welcome = "Welcome to the Tutorial Blackjack Simulator"
@@ -424,7 +425,7 @@ class black_jack_colorless:
             self.traditional_blackjack(pair=True,soft=False,deck_num=False)
         elif re.search('[jJ]|[jJ]ack|[bB]lack[jJ]ack|3', selection):
             self.deck_num = input("Please Select Standard Type Or Indicate The Number Of Decks You Want To Play With\n")
-            if self.deck_num.isnumeric() != True or self.deck_num == 0 :
+            if self.deck_num.isnumeric() != True:
                 self.deck_num = False
             elif int(self.deck_num) == 1:
                 print("Shuffling Deck\n")
