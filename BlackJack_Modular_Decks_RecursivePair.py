@@ -4,7 +4,7 @@ Created on Thu Apr 13 11:13:34 2023
 
 @author: Austin Dickerson
 """
-#call program in anaconda with: "python *path*\Blackjack_Modular_Decks2.py"
+#call program in anaconda with: "python *path*\Blackjack_Modular_Decks_RecursivePair.py"
 import os
 import time
 import random
@@ -439,4 +439,4 @@ class black_jack_colorless:
 bj = black_jack_colorless()
 bj.run()
 
-#call program in anaconda with: "python *path*\Blackjack_Modular_Decks.py"
+#call program in anaconda with: "python *path*\Blackjack_Modular_Decks_RecursivePair.py"
