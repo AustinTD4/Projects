@@ -204,7 +204,7 @@ async function fetchMessage(button_id) {
 /* reports the next move to Flask */
 async function buttonClick(button_id, isRecursiveCall=false) {
 
-    /*  */
+    /* determines if the player or dealer is making the next move */
     let rowToUpdate;
     if (button_id === 1 && hands === 1) {
         rowToUpdate = 1;
