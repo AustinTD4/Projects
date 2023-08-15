@@ -7,6 +7,7 @@
 ## Requirements
 
 - **Python**: 3.x
+- **Jupyter Notebook**
 - **Package Manager**: `pip`
 
 ## Dependencies
@@ -34,7 +35,7 @@ python3 -m venv env
 source env/bin/activate # On Windows use env\Scripts\activate
 
 5. **Install the required libraries**:
-pip install Flask colorama gtts playsound
+pip install Flask colorama gtts playsound jupyter
 
 ## Usage
 
