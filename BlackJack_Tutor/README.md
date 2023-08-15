@@ -1,25 +1,50 @@
-BlackJack Strategy Tutor
+# BlackJack Strategy Tutor
+- This program allows players to sharpen their BlackJack strategy by providing active assessment of their decisions as the game plays
+- Players interact with a dealer at a virtual BlackJack table on a local web browser page
+- Players can select specialized scenarios, like only hands with pairs, or only hands which contain an ace, allowing them to practice more difficult decisions that come up less often in real games
+- Players win or lose credits and recieve an overall assessment of their decision making after quitting
 
-Requirements:
-Python 3.x
-pip
+## Requirements
 
-This project requires the following libraries:
-Flask
-colorama
-gtts (Google Text-to-Speech)
-playsound
+- **Python**: 3.x
+- **Package Manager**: `pip`
 
-Installation & Setup
-Clone the repository:
+## Dependencies
+
+This project relies on the following libraries:
+
+- `Flask`
+- `colorama`
+- `gtts` (Google Text-to-Speech)
+- `playsound`
+
+## Installation & Setup
+
+1. **Clone the repository**:
 git clone https://github.com/AustinTD4/Projects/BlackJack_Tutor.git
 
-Create a virtual environment:
-python3 -m venv env
-source env/bin/activate
+2. **Navigate to the project directory**:
+cd BlackJack_Tutor
 
-Install the required libraries:
+3. **Create a virtual environment**:
+python3 -m venv env
+source env/bin/activate # On Windows use env\Scripts\activate
+
+4. **Install the required libraries**:
 pip install Flask colorama gtts playsound
 
-Usage:
-To run the program, open BlackJack_FlaskVersion.ipynb and run the main cell. You may also select a different number of decks to play with (2 is standard) by placing an integer in the parameter for the "initial()" method.
+## Usage
+
+To use the program:
+
+1. Open `BlackJack_FlaskVersion.ipynb`.
+2. Run the main cell.
+3. Optionally, to play with a different number of decks (default is 2), provide an integer to the `initial()` method like this:
+```python
+initial(3)  # This will use 3 decks.
+```
+4. Once the cell runs, a link to open the virtual BlackJack table will appear in the cell output, click on this link to begin
+```python
+ * Running on http://127.0.0.1:1438
+```
+5. Note to not press a button before the last one has resolved, or the program may become asynchronous
