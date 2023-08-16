@@ -6,7 +6,7 @@
 
 ## Requirements
 
-- **Python**: 3.x
+- **Python**: 3.9
 - **Jupyter Notebook**
 - **Package Manager**: `pip`
 
