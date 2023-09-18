@@ -7,7 +7,6 @@
 ## Requirements
 
 - **Python**: 3.9
-- **Jupyter Notebook**
 - **Package Manager**: `pip`
 
 ## Dependencies
@@ -35,20 +34,21 @@ python3 -m venv env
 source env/bin/activate # On Windows use env\Scripts\activate
 
 5. **Install the required libraries**:
-pip install Flask colorama gtts pygame jupyter
+pip install Flask colorama gtts pygame
 
 ## Usage
 
 To use the program:
 
-1. Open `BlackJack_FlaskVersion.ipynb`.
-2. Run the main cell.
-3. Optionally, to play with a different number of decks (default is 2), provide an integer to the `startup()` method like this:
+1. Open `BlackJack_Flask_Main.py`
+2. Optionally, to play with a different number of decks (default is 2), provide an integer to the `startup()` method like this:
 ```python
-startup(3)  # This will use 3 decks.
+startup(3)  # This will use 3 decks
 ```
+3. Run the program
 4. Once the cell runs, a link to open the virtual BlackJack table will appear in the cell output, click on this link to begin
 ```python
  * Running on http://127.0.0.1:1438
 ```
-5. Note to not press a button before the last one has resolved, or the program may become asynchronous
+5. When playing, use `Regular', `Soft Totals', and `Pair' buttons to change the type of hands you can draw.
+5. Note to not press a button before the last one has resolved, or asynchronous functions can cause errors
