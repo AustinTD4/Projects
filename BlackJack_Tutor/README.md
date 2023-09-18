@@ -46,7 +46,7 @@ To use the program:
 startup(3)  # This will use 3 decks
 ```
 3. Run the program
-4. Once the cell runs, a link to open the virtual BlackJack table will appear in the cell output, click on this link to begin
+4. Next a link to open the virtual BlackJack table will appear in the cell output, click on this link to begin
 ```python
  * Running on http://127.0.0.1:1438
 ```
