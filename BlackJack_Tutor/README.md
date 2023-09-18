@@ -17,7 +17,7 @@ This project relies on the following libraries:
 - `Flask`
 - `colorama`
 - `gtts` (Google Text-to-Speech)
-- `playsound`
+- `pygame`
 
 ## Installation & Setup
 
@@ -35,7 +35,7 @@ python3 -m venv env
 source env/bin/activate # On Windows use env\Scripts\activate
 
 5. **Install the required libraries**:
-pip install Flask colorama gtts playsound jupyter
+pip install Flask colorama gtts pygame jupyter
 
 ## Usage
 
