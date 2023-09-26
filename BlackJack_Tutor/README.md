@@ -26,14 +26,11 @@ git clone https://github.com/AustinTD4/Projects/BlackJack_Tutor.git
 2. **Navigate to the project directory**:
 cd BlackJack_Tutor
 
-3. **Set up the necessary folders**:
-Create a folder named 'static' within the project directory. Move the 'images' folder into the 'static' folder.
-
-4. **Create a virtual environment**:
+3. **Create a virtual environment**:
 python3 -m venv env
 source env/bin/activate # On Windows use env\Scripts\activate
 
-5. **Install the required libraries**:
+4. **Install the required libraries**:
 pip install Flask colorama gtts pygame
 
 ## Usage
