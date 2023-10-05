@@ -6,7 +6,7 @@ The program leverages the Pygame Framework for Evoman, a rendition of the popula
 
 ## Framework
 
-This framework is designed for modularity, making it adaptable beyond the realms of Evoman. To employ this framework for other applications:
+This framework is designed for modularity, making it adaptable beyond Evoman. To employ this framework for other applications:
 1. Modify the simulation to function in the new environment.
 2. Adjust the Neural Network shape accordingly.
 
