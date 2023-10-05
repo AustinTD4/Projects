@@ -57,6 +57,7 @@ The compatibility matrix for the Evolutionary Algorithm parameters is as follows
 - Discrete Crossover
 - Individual Cross
 - Crossover Line
+  
 
 | Algorithm/Parameter                     | Mutation Intensity | Mutagenic Temperature | Weighted Avg [Default] | Discrete | Individual Cross | Crossover Line | Curve Parents | Elitism | Threshold | Speciation Frequency | Scaling Factor | Reseed Cycle |
 |----------------------------------------|--------------------|-----------------------|------------------------|----------|------------------|----------------|---------------|---------|----------|----------------------|----------------|--------------|
