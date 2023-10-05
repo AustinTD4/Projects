@@ -71,7 +71,7 @@ The compatibility matrix for the Evolutionary Algorithm parameters is as follows
 
 ## Evoman
 
-Evoman features eight unique enemies, each providing a fitness score for the player during gameplay. The scoring considers player life, enemy life, and game time.
+Evoman features eight unique enemies, each capable of providing a fitness score for the player during gameplay. The scoring considers player life, enemy life, and game time.
 
 ### Generalist Algorithm
 
