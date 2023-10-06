@@ -36,13 +36,10 @@ git clone https://github.com/AustinTD4/Projects.git
 3. **Navigate to the Framework Directory**:
 cd Evolutionary_Algorithm_Framework
 
-4. **Install the required libraries**:
-pip install numpy pandas pygame
-
-5. **Run the grid search program**:
+4. **Run the grid search program**:
 Grid_Search_Generalist.py
 
-6. **Run the in-depth analysis**:
+5. **Run the in-depth analysis**:
 Tuning_Generalist.py
 
 
