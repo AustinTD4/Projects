@@ -27,10 +27,13 @@ This project relies on the following libraries:
 
 ## Installation & Setup for Reproducing Evoman Experiments
 
-1. **Clone the repository**:
+1. **Install the required libraries**:
+pip install numpy pandas pygame
+
+2. **Clone the repository**:
 git clone https://github.com/AustinTD4/Projects.git
 
-2. **Navigate to the Framework Directory**:
+3. **Navigate to the Framework Directory**:
 cd Evolutionary_Algorithm_Framework
 
 4. **Install the required libraries**:
