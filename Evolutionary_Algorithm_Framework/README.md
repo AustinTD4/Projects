@@ -25,16 +25,22 @@ This project relies on the following libraries:
 - `Pandas`
 - `Pygame`
 
-## Installation & Setup for Evoman Experiments
+## Installation & Setup for Reproducing Evoman Experiments
 
 1. **Clone the repository**:
-git clone https://github.com/AustinTD4/Projects/Genetic_Algorithm_Framework.git
+git clone https://github.com/AustinTD4/Projects.git
 
-2. **Install the required libraries**:
+2. **Navigate to the Framework Directory**:
+cd Evolutionary_Algorithm_Framework
+
+4. **Install the required libraries**:
 pip install numpy pandas pygame
 
-3. **Run the program**:
-Evolutionary_Algorithm_Generalist.py
+5. **Run the grid search program**:
+Grid_Search_Generalist.py
+
+6. **Run the in-depth analysis**:
+Tuning_Generalist.py
 
 
 ### Compatibility Matrix
