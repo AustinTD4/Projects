@@ -1132,7 +1132,7 @@ if __name__ == '__main__':
         print(f'Player Life avg: {np.mean(avg_lives[i])}')
     
     if save:
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Fit_Scores_3.csv", performances, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Player_Life_3.csv", avg_lives, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Combo_Key_3.csv", combinations, delimiter=",")
+        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Fit_Scores_3.csv", performances2, delimiter=",")
+        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Player_Life_3.csv", avg_lives2, delimiter=",")
+        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Combo_Key_3.csv", combinations2, delimiter=",")
 
