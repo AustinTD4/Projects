@@ -39,7 +39,7 @@ Evolutionary_Algorithm_Generalist.py
 
 ### Compatibility Matrix
 
-The compatibility matrix for the Evolutionary Algorithm parameters is as follows. All strategy and recombination parameters are set to `False` by default, except for defaults. If other strategies of the same category are chosen, they override the default. Only one reproduction strategy and one recombination type can be chosen per experiment. Yellow marks (🟡) indicate a default value, which though present, does not impact experimental behavior.
+The compatibility matrix for the Evolutionary Algorithm parameters is as follows below. All strategy and recombination parameters are set to `False` by default, except for defaults. If other strategies of the same category are chosen, they override the default. Only one reproduction strategy and one recombination type can be chosen per experiment. Yellow marks (🟡) indicate a default value, which though present, does not impact experimental behavior.
 
 #### Reproduction Strategies
 
