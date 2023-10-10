@@ -1154,13 +1154,13 @@ if __name__ == '__main__':
 
 
     ##### Test Speciation #####
-    filename = f'GENERALIST_Vindividual_cross'
+    filename = f'GENERALIST_Vspeciation'
 
     if not os.path.exists(f'{stat_directory}_{filename}'):
         os.makedirs(f'{stat_directory}_{filename}')
 
     # Train new algorithms
-    evoman_train_set(filename, pop, runs, save=True, multiple_mode=True, evolutionary_programming=False, speciate=True)
+    evoman_train_set(filename, pop, runs, save=True, multiple_mode=True, evolutionary_programming=False, speciate=True, dynamic_speciation=True)
 
     # Test the best parameters
     performance, avg_life, avg_gain = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=True)
