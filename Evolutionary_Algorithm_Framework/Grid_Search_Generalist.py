@@ -8,67 +8,15 @@
 # imports evoman and controller frameworks
 from evoman.environment import Environment
 from demo_controller import player_controller
+#rom sklearn.cluster import KMeans
 import os, random, time, csv, itertools
 import numpy as np
 import pandas as pd
 
-# Game Parameters
-evoman = True
-set = [1,4,6]
-generalist = True
-multiple_mode = True
 
 # NN Parameters
 n_hidden_neurons = 10
 num_vars = n_hidden_neurons * (21) + (n_hidden_neurons + 1) * 5
-
-# Experiment Parameters
-pop_size = 100
-generations = 20
-early_stop = False
-
-# Mutation Parameters
-mutation_intensity = 1
-mutagenic_temperature = 0.2
-mutation_reset = False
-
-# Reproduction Parameters
-discrete = False
-individual_cross = False
-crossover_line = False
-curve_parents = True
-
-# Elitism Parameters
-elitism = 1
-half = False
-
-# Optimization Parameters
-prioritize_life = False
-prioritize_time = False
-objective_switchpoint = False
-
-# Doomsday parameter
-reseed_cycle = False
-
-
-##### Reproduction Strategy ##### 
-# reproduce_generational is default if all below are false)
-reproduce_steady = False
-comma_strategy = False
-evolutionary_programming = False
-
-# Non-traditional reproductive algorithms
-particle_swarm_optimization = False
-pso_weights = [0.5, 0.5, 0.3] 
-
-differential_evolution = False
-scaling_factor = 0.8
-
-# Speciation Paremeters
-speciate = False
-threshold = 0.65
-speciation_frequency = 10
-
 
 # Reproducability
 random.seed(579)
@@ -78,12 +26,74 @@ save = True
 
 # Experiment state variables
 pop = []
-midpoint = False
+
+settings = {
+
+# Game Parameters
+'evoman': True,
+'set': [5,6,8],
+'generalist': True,
+'multiple_mode': True,
+'midpoint': False,
+
+# Experiment Parameters
+'pop_size': 100,
+'generations': 20,
+'early_stop': False,
+
+# Mutation Parameters
+'mutation_intensity': 1,
+'mutagenic_temperature': 0.1,
+'mutation_reset': False,
+
+# Reproduction Parameters 
+'discrete': False,
+'individual_cross': False,
+'crossover_line': False,
+'curve_parents': True,
+
+# Elitism Parameters
+'elitism': 1,
+'half': False,
+
+# Optimization Parameters
+'prioritize_life': False,
+'prioritize_time': False,
+'prioritize_gains': False,
+'objective_switchpoint': False,
+
+# Doomsday parameter
+'reseed_cycle': False,
+
+
+##### Reproduction Strategies ##### 
+# reproduce_generational is default if all are false
+'reproduce_steady': False,
+'comma_strategy': False,
+'evolutionary_programming': False,
+
+# Non-traditional reproductive algorithms
+'particle_swarm_optimization': False,
+'pso_weights': [0.5, 0.5, 0.3],
+
+'differential_evolution': False,
+'crossover_rate': 0.9, 
+'scaling_factor': 0.8,
+
+# Speciation Paremeters
+'speciate': False,
+'dynamic_speciation': False,
+'threshold': 0.35,
+'num_kmeans_clusters': 8,
+'speciation_frequency': 10,
+
+}
+
 
 # Name of the experiment
 filename = 'GENERALIST_TEST'
 
-experiment_name = 'controller_generalist'
+experiment_name = 'controller_specialist'
 
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
@@ -98,14 +108,14 @@ if not os.path.exists(f'{stat_directory}_{filename}'):
 ##### Population manipulating methods #####
 
 # Create the randomized population
-def initialize_population(pop_size, num_vars):
+def initialize_population(pop_size, num_vars, var_range=1):
     pop = []
 
     for _ in range(pop_size):
         member = np.zeros(num_vars)
 
         for j in range(num_vars):
-            member[j] = random.uniform(-1,1)
+            member[j] = random.uniform(-var_range,var_range)
 
         pop.append(member)   
 
@@ -133,31 +143,35 @@ def test_population(pop):
     scores = []
     lives = []
     gametimes = []
+    gains = []
+    pop = list(pop)
 
     for unit in pop:
 
-        if evoman:
+        if settings['evoman']:
             fit, p_life, e_life, gametime = env.play(pcont=unit)
-        else:
-            # Space for alternate environments/games
-            fit, p_life, e_life, gametime = 0, 0, 0, 0
+            gain = p_life - e_life
 
         scores.append(fit)
         lives.append(p_life)
+        gains.append(gain)
         gametimes.append(gametime)
 
     # Base best parameters on the right metric
-    if prioritize_life == True:
+    if settings['prioritize_life']:
         maximum = max(lives)
         ind = lives.index(maximum)
-    elif prioritize_time == True:
+    elif settings['prioritize_time']:
         maximum = max(gametimes)    
         ind = gametimes.index(maximum)
+    elif settings['prioritize_gains']:
+        maximum = max(gains)    
+        ind = gains.index(maximum)
     else:
         maximum = max(scores)
         ind = scores.index(maximum)
 
-    return scores, maximum, ind, lives, gametimes
+    return scores, maximum, ind, lives, gametimes, gains
 
 
 ##### Statistics #####
@@ -169,6 +183,8 @@ def normalize(scores):
     hi = max(scores)
     scores -= lo
     scores /= (hi-lo)
+    if np.any(np.isnan(scores)):
+        print("There are NaN values in the normalized scores!")
 
     return scores
 
@@ -177,7 +193,7 @@ def evo_normalize(scores):
     scores = np.array(scores)
 
     # Accommodate the greater range of fit scores during multi_mode (min varies by st. dev.)
-    if multiple_mode:
+    if settings['multiple_mode']:
         scores += 20
         scores /= 120
     else:
@@ -209,7 +225,7 @@ def sort(pop, fit_scores):
 def select_parents(pop, low=None, high=None, probabilities=None):
 
     # Select based on proportion to fitness scores
-    if curve_parents == True:
+    if settings['curve_parents']:
         selected = np.random.choice(len(pop), 2, p=probabilities, replace=False)
         p1 = pop[selected[0]]
         p2 = pop[selected[1]]
@@ -230,26 +246,17 @@ def select_parents(pop, low=None, high=None, probabilities=None):
 ##### Recombination #####
 
 # Returns one or two children from two parents
-def reproduction(p1, p2, two_child=True):
-    if discrete:
+def reproduction(p1, p2):
+    if settings['discrete']:
         child = combine_genes_discrete(p1, p2)
-        if two_child:
-            child2 = combine_genes_discrete(p1, p2)
 
-    elif individual_cross:
+    elif settings['individual_cross']:
         child = combine_genes_individual_cross(p1, p2)
-        if two_child:
-            child2 = combine_genes_individual_cross(p1, p2)
 
     else:
         child = combine_genes_cross(p1, p2)
-        if two_child:
-            child2 = combine_genes_cross(p1, p2)
 
-    if two_child:
-        return child, child2
-    else:
-        return child
+    return child
 
 # Take one allele from each parent with uniform probability
 def combine_genes_discrete(p1, p2):
@@ -266,7 +273,7 @@ def combine_genes_discrete(p1, p2):
 def combine_genes_cross(p1, p2):
     temp = np.random.random()
 
-    if crossover_line == True:
+    if settings['crossover_line']:
         ind = int(len(p1) * temp)
         child = np.concatenate((p1[:ind], p2[ind:]))
     else:
@@ -292,18 +299,14 @@ def combine_genes_individual_cross(p1, p2):
 def mutate_offspring(child):
     for i in range(len(child)):
 
-        if random.random() < mutagenic_temperature:
+        if random.random() < settings['mutagenic_temperature']:
 
             # Either reset the allele or alter the existing
-            if mutation_reset == True:
+            if settings['mutation_reset']:
                 child[i] = np.random.uniform(-1,1)
             else:
-                child[i] += np.random.normal(0, mutation_intensity)
-
-                if child[i] < -1:
-                    child[i] = -1
-                if child[i] > 1:
-                    child[i] = 1
+                child[i] += np.random.normal(0, settings['mutation_intensity'])
+                child[i] = np.clip(child[i], -1, 1)
 
     return child
 
@@ -321,11 +324,51 @@ def mutate_offspring_EP(child, perturbation_vector):
 
         # Mutate NN parameters
         child[i] += np.random.normal(0, perturbation_vector[i])
+        child[i] = np.clip(child[i], -1, 1)
 
     return child, perturbation_vector
 
 
 ##### Reproduction and Survival #####
+
+# Combine selection, mutation and testing
+def form_new_generation(pop, probabilities, gen_size):
+    new_fit = []
+    new_pop = []
+
+    for _ in range(gen_size):
+        p1, p2 = select_parents(pop, int(pop_size/2), len(pop), probabilities)
+
+        child = reproduction(p1, p2)
+
+        new_pop.append(mutate_offspring(child))
+
+        if settings['evoman']:
+            fit, p_life, e_life, gametime = env.play(pcont=child)
+            gain = p_life - e_life
+            
+            # Add the metric being optimized
+            if settings['prioritize_life']:
+                new_fit.append(p_life)
+            elif settings['prioritize_time']:
+                new_fit.append(gametime)
+            elif settings['prioritize_gains']:
+                new_fit.append(gain)
+            else:
+                new_fit.append(fit)
+
+    new_pop, new_fit = sort(new_pop, new_fit)
+
+    if settings['prioritize_life']:
+        probabilities = relative_prob(new_fit)
+    else:
+        new_fit_norm = normalize(new_fit)
+        probabilities = relative_prob(new_fit_norm)
+
+    new_pop = np.array(new_pop)
+    new_fit = np.array(new_fit)
+
+    return new_pop, new_fit, probabilities
 
 # Reproduce with all parents replaced by offspring
 def reproduce_generational(pop, probabilities, old_fit):
@@ -334,49 +377,15 @@ def reproduce_generational(pop, probabilities, old_fit):
     new_fit = []
 
     # Select and replace all the parents with their offspring and update fit scores
-    for _ in range(pop_size):
-        p1, p2 = select_parents(pop, int(pop_size/2), len(pop), probabilities)
-
-        child, child2 = reproduction(p1, p2)
-
-        new_pop.append(mutate_offspring(child))
-        new_pop.append(mutate_offspring(child2))
-
-        if evoman:
-            fit, p_life, e_life, gametime = env.play(pcont=child)
-            fit2, p_life2, e_life2, gametime2 = env.play(pcont=child2)
-            
-            # Add the metric being optimized
-            if prioritize_life:
-                new_fit.append(p_life)
-                new_fit.append(p_life2)
-            elif prioritize_time:
-                new_fit.append(gametime)
-                new_fit.append(gametime2)
-            else:
-                new_fit.append(fit)
-                new_fit.append(fit2)
-
-    # Assign the fitness score list to the right performance metric
-    if prioritize_life:
-        probabilities = relative_prob(new_fit)
-    elif prioritize_time:
-        new_fit = normalize(new_fit)
-        probabilities = relative_prob(new_fit)
-    else:
-        new_fit_norm = normalize(new_fit)
-        probabilities = relative_prob(new_fit_norm)
-
-    new_pop = np.array(new_pop)
-    new_fit = np.array(new_fit)
+    new_pop, new_fit, probabilities = form_new_generation(pop, probabilities, pop_size*2)
     
     # Copy the top performers or let them be replaced
-    if type(elitism) == int and (midpoint == True or half == False):
-        selected = np.random.choice(pop_size*2, pop_size-elitism, p=probabilities, replace=False)
+    if type(settings['elitism']) == int and (settings['midpoint'] == True or settings['half'] == False):
+        selected = np.random.choice(pop_size*2, pop_size-settings['elitism'], p=probabilities, replace=False)
         new_pop = new_pop[selected]
         new_fit = new_fit[selected]
-        new_pop = np.concatenate((new_pop, pop[-elitism:]))
-        new_fit = np.concatenate((new_fit, old_fit[-elitism:]))
+        new_pop = np.concatenate((new_pop, pop[-settings['elitism']:]))
+        new_fit = np.concatenate((new_fit, old_fit[-settings['elitism']:]))
     else:
         selected = np.random.choice(pop_size*2, pop_size, p=probabilities, replace=False)
         new_pop = new_pop[selected]
@@ -389,40 +398,13 @@ def reproduce_steady_pop(pop, probabilities, old_fit):
     pop = list(pop)
     new_pop = []
     new_fit = []
-    next_gen = int(pop_size/10)
+    next_gen = int(pop_size/5)
 
-    for _ in range(next_gen):
-        p1, p2 = select_parents(pop, int(pop_size/2), len(pop), probabilities)
-
-        child, child2 = reproduction(p1, p2)
-        
-        new_pop.append(mutate_offspring(child))
-        new_pop.append(mutate_offspring(child2))
-
-        if evoman:
-            fit, p_life, e_life, gametime = env.play(pcont=child)
-            fit2, p_life2, e_life2, gametime2 = env.play(pcont=child2)
-
-            # Add the metric being optimized
-            if prioritize_life:
-                new_fit.append(p_life)
-                new_fit.append(p_life2)
-            elif prioritize_time:
-                new_fit.append(gametime)
-                new_fit.append(gametime2)
-            else:
-                new_fit.append(fit)
-                new_fit.append(fit2)
-
-        if not prioritize_life:
-            new_fit_norm = evo_normalize(new_fit)
-            probabilities = relative_prob(new_fit_norm)
+    new_pop, new_fit, probabilities = form_new_generation(pop, probabilities, next_gen*2)
 
     selected = np.random.choice(next_gen*2, next_gen, p=probabilities,
                                 replace=False)
     
-    new_pop = np.array(new_pop)
-    new_fit = np.array(new_fit)
     new_pop = new_pop[selected]
     new_fit = new_fit[selected]
     new_pop = np.concatenate((new_pop, pop[-(pop_size-next_gen):]))
@@ -435,32 +417,13 @@ def reproduce_comma_strategy(pop, probabilities, old_fit):
     pop = list(pop)
     new_pop = []
     new_fit = []
-    next_gen = pop_size * 3
+    next_gen = pop_size * 7
+    elitism = settings['elitism']
 
-    # Populate the new generation
-    for _ in range(next_gen):
-        p1, p2 = select_parents(pop, int(pop_size / 2), len(pop), probabilities)
-
-        child = reproduction(p1, p2, two_child=False)
-        new_pop.append(mutate_offspring(child))
-
-        if evoman:
-            fit, p_life, e_life, gametime = env.play(pcont=new_pop[-1])
-
-            # Add the metric being optimized
-            if prioritize_life:
-                new_fit.append(p_life)
-            elif prioritize_time:
-                new_fit.append(gametime)
-            else:
-                new_fit.append(fit)
-
-    new_pop, new_fit = sort(new_pop, new_fit)
-    new_pop = np.array(new_pop)
-    new_fit = np.array(new_fit)
+    new_pop, new_fit, probabilities = form_new_generation(pop, probabilities, next_gen)
 
     # Handle elitism parameters is any
-    if type(elitism) == int and (midpoint or not half):
+    if type(elitism) == int and (settings['midpoint'] or not settings['half']):
         new_pop = new_pop[-(pop_size - elitism):]
         new_fit = new_fit[-(pop_size - elitism):]
         new_pop = np.concatenate((new_pop, [pop[-elitism]]))
@@ -476,37 +439,48 @@ def reproduce_EP(pop, perturbation_vectors):
     pop = np.array(pop)
     perturbation_vectors = np.array(perturbation_vectors)
     new_pop = []
+    new_vectors = []
 
     for i in range(pop_size):
-        new_pop.append(mutate_offspring_EP(pop[i], perturbation_vectors[i]))
+        child, new_perturbation_vector = mutate_offspring_EP(pop[i], perturbation_vectors[i])
+        new_pop.append(child)
+        new_vectors.append(new_perturbation_vector)
 
     new_pop = np.array(new_pop)
+    new_vectors = np.array(new_vectors)
     pop = np.vstack((pop,new_pop))
+    perturbation_vectors = np.vstack((perturbation_vectors,new_vectors))
 
-    scores, maxi, ind, lives, gametimes = test_population(pop)
+    scores, maxi, ind, lives, gametimes, gains = test_population(pop)
 
-    if prioritize_life:
-        scores = normalize(lives)
-    elif prioritize_time:
-        scores = normalize(gametimes)
+    if settings['prioritize_life']:
+        scores2 = normalize(lives)
+        scores = lives
+    elif settings['prioritize_time']:
+        scores2 = normalize(gametimes)
+        scores = gametimes
+    elif settings['prioritize_gains']:
+        scores2 = normalize(gains)
+        scores = gains
     else:
-        scores = evo_normalize(scores)
+        scores2 = evo_normalize(scores)
         
-    probabilities = relative_prob(scores)
+    probabilities = relative_prob(scores2)
 
     # Survival based probabilistically on relative fitness
     selected = np.random.choice(pop_size*2, pop_size, p=probabilities, replace=False)
     pop = pop[selected]
-    scores = scores[selected]
+    perturbation_vectors = perturbation_vectors[selected]
+    scores = np.array(scores)[selected]
 
     return pop, perturbation_vectors, scores
 
 # Reproduce with the DE strategy
-def reproduce_differential_evolution(pop):
+def reproduce_differential_evolution(pop, fit_scores):
     pop = np.array(pop)
+    fit_scores = np.array(fit_scores)
     mutation_vectors = np.zeros((pop_size, num_vars))
     advantage = 0
-    fit_scores = []
 
     for i in range(pop_size):
 
@@ -514,44 +488,32 @@ def reproduce_differential_evolution(pop):
         choices = [item for j, item in enumerate(pop) if j != i]
         Ai, Bi, Ci = random.sample(choices, 3)
 
-        mutation_vectors[i] = Ai + scaling_factor * (Bi - Ci)
+        mutation_vectors[i] = Ai + settings['scaling_factor'] * (Bi - Ci)
 
         # Create child Ui
         for j in range(num_vars):
-            if random.random() > 0.5:
-                mutation_vectors[i,j] = pop[i][j]
+            if random.random() > settings['crossover_rate']:
+                mutation_vectors[i,j] = pop[i,j]
 
         # Tournament between progenitor and offspring for survival
-        if evoman:
-            fit, p_life, e_life, gametime = env.play(pcont=pop[i])
-            fit2, p_life2, e_life2, gametime2 = env.play(pcont=mutation_vectors[i])
+        if settings['evoman']:
+            fit, p_life, e_life, gametime = env.play(pcont=mutation_vectors[i])
+            gain = p_life - e_life
 
-            if prioritize_life:
-                if p_life2 > p_life:
-                    pop[i] = mutation_vectors[i]
-                    fit_scores.append(p_life2)
-                    advantage += 1
-                else:
-                    fit_scores.append(p_life)
+            if settings['prioritize_life']:
+                fit = p_life
+            elif settings['prioritize_time']:
+                fit = gametime
+            elif settings['prioritize_gains']:
+                fit = gain
 
-            elif prioritize_time:
-                if gametime2 > gametime:
-                    pop[i] = mutation_vectors[i]
-                    fit_scores.append(gametime2)
-                    advantage += 1
-                else:
-                    fit_scores.append(gametime)
-
-            else:
-                if fit2 > fit:
-                    pop[i] = mutation_vectors[i]
-                    fit_scores.append(p_life2)
-                    advantage += 1
-                else:
-                    fit_scores.append(p_life)
+        if fit > fit_scores[i]:
+            pop[i] = mutation_vectors[i]
+            fit_scores[i] = fit
+            advantage += 1
 
     # Tracks effectiveness of mutations
-    print(f'{(advantage/pop_size)*100} percent of mutations conferred advantage')
+    print(f'{np.round(((advantage/pop_size)*100), 2)} percent of mutations conferred advantage')
 
     return pop, fit_scores
 
@@ -559,6 +521,13 @@ def reproduce_differential_evolution(pop):
 def vector_shift_PSO(pop, velocity_vectors, previous_bests, previous_scores, global_best, best_score):
     pop = np.array(pop)
     velocity_vectors = np.array(velocity_vectors)
+    pso_weights = settings['pso_weights']
+
+    # Reset the score trackers to a different scale
+    if not settings['prioritize_time'] and best_score > 100:
+        best_score = -50
+        velocity_vectors = initialize_population(pop_size, num_vars, 0.2)
+        previous_scores[:] = -50
 
     for i in range(pop_size):
         prev_velocity = velocity_vectors[i]
@@ -571,18 +540,18 @@ def vector_shift_PSO(pop, velocity_vectors, previous_bests, previous_scores, glo
         pop[i] = pop[i] + prev_velocity
 
         for j in range(num_vars):
-            if pop[i][j] > 1:
-                pop [i][j] = 1
-            if pop[i][j] < -1:
-                pop[i][j] = -1
+            np.clip(pop[i,j],-1,1)
 
-        if evoman:
+        if settings['evoman']:
             score, p_life, e_life, gametime = env.play(pcont=pop[i])
+            gain = p_life - e_life
             
-            if prioritize_life:
+            if settings['prioritize_life']:
                 score = p_life
-            elif prioritize_time:
+            elif settings['prioritize_time']:
                 score = gametime
+            elif settings['prioritize_gains']:
+                score = gain
             
         if score > best_score:
             global_best = pop[i]
@@ -596,31 +565,37 @@ def vector_shift_PSO(pop, velocity_vectors, previous_bests, previous_scores, glo
     return  pop, velocity_vectors, previous_bests, previous_scores, global_best, best_score 
 
 # Reproduce within subgroups of individuals only
-def reproduce_by_species(pop, generation, species=None):
+def reproduce_by_species(pop, generation, species_count=0, species=None):
 
     # Speciate based on frequency
-    if curve_parents and generation == 0:
-        species_count, _, species = speciate_population(threshold, pop)
-    elif curve_parents and (generation%speciation_frequency) == 0:
-        species_count, _, species = speciate_population(threshold, pop)
-    else:
-        species_count, _, species = speciate_population(threshold, pop[-pop_size:])
-    
+    if generation == 0:
+        species_count, _, species = speciate_population(settings['threshold'], pop)
+    elif settings['speciation_frequency'] != None and (generation % settings['speciation_frequency']) == 0:
+        species_count, _, species = speciate_population(settings['threshold'], pop)
+
+    # Initialize test statistics
     species_max = []
     species_avg = []
     new_pop = []
     norm_avg = []
     count_each_species = []
     probability_sets = []
+    species_scores = np.array([])
 
-    # Test each species
+    # Test each species with viable size
     for i in range(species_count):
-        scores, maximum, _ = test_population(species[f'species_{i+1}_list'])
-        probability_sets.append(relative_prob(scores))
-        scores2 = evo_normalize(scores)
-        norm_avg.append(np.average(scores2))
-        species_max.append(maximum)
-        species_avg.append(np.average(scores))
+
+        if len(species[f'species_{i+1}_list']) != 0:
+            scores, maximum, p_life, e_life, gametime = test_population(species[f'species_{i+1}_list'])
+            gain = p_life - e_life
+            probability_sets.append(relative_prob(scores))
+            scores2 = evo_normalize(scores)
+            norm_avg.append(np.average(scores2))
+            species_max.append(maximum)
+            species_avg.append(np.average(scores))
+            species_scores = np.append(species_scores, scores)
+        else:
+            species_count -= 1
 
     for k in range(species_count):
         count_each_species.append(len(species[f'species_{k+1}_list']))
@@ -672,24 +647,14 @@ def reproduce_by_species(pop, generation, species=None):
             for _ in range(ratios[i]):
 
                 # Selection, reproduction, and mutation
-                if curve_parents:
-                    p1, p2 = select_parents(species[f'species_{i+1}_list'], probability_sets[i])
-                    child = reproduction(p1, p2, two_child=False)
-                else:
-                    p1, p2 = random.sample(species[f'species_{i+1}_list'], 2)
-                    child, child2 = reproduction(p1, p2)
-                
+                p1, p2 = select_parents(species[f'species_{i+1}_list'], probability_sets[i])
+                child = reproduction(p1, p2)
                 child = mutate_offspring(child)
-                if not curve_parents:
-                    child2 = mutate_offspring(child2)
 
                 species2[f'species_{i+1}_list'].append(child)
                 new_pop.append(child)
-                if not curve_parents:
-                    species2[f'species_{i+1}_list'].append(child2)  
-                    new_pop.append(child2)
 
-    return new_pop, species2
+    return new_pop, species2, species_scores, species_count
 
 
 ##### Speciation #####
@@ -697,45 +662,68 @@ def reproduce_by_species(pop, generation, species=None):
 # Change the speciation threshold to keep in desired range
 def dynamic_speciation(species_count):
     if species_count >= 10:
-        globals() ['threshold'] += 0.025
+        settings['threshold'] += 0.005
     if species_count < 5:
-        globals() ['threshold'] -= 0.025
+        settings['threshold'] -= 0.005
+
+    threshold = settings['threshold']
+    print(f'Threshold: {np.round(threshold, 3)}')
 
 # Separate a generation into species based on threshold
-def speciate_population(threshold, pop):
+def speciate_population(species_threshold, pop):
     pop = np.flip(pop)
     representatives = [random.choice(pop)]
-    species_count = 1
     species = {}
-    species[f'species_{species_count}_list'] = []
+    
+    # Standard speciation practice with a dynamic threshold
+    if settings['dynamic_speciation']:
+        species_count = 1
+        species[f'species_{species_count}_list'] = []
 
-    for individual in pop:
-        found = False
-        count = 0
+        for individual in pop:
+            found = False
+            count = 0
 
-        while found == False:
+            while not found:
 
-            # Check for individuals whose normalized average difference in parameters is below the threshold
-            difference = np.average(np.abs(individual-representatives[count])/2)
+                # Check for individuals whose normalized average difference in parameters is below the threshold
+                difference = np.average(np.abs(individual - representatives[count]) / 2)
 
-            if difference < threshold:
-                species[f'species_{count+1}_list'].append(individual)
-                found = True
+                if difference < species_threshold:
+                    species[f'species_{count+1}_list'].append(individual)
+                    found = True
 
-            count += 1
+                count += 1
 
-            # Add a new species if the current individual cannot be classified
-            if count == species_count:
-                species_count += 1
-                representatives.append(individual)
-                species[f'species_{species_count}_list'] = [individual]
-                found = True
+                # Add a new species if the current individual cannot be classified
+                if count == species_count:
+                    species_count += 1
+                    representatives.append(individual)
+                    species[f'species_{species_count}_list'] = [individual]
+                    found = True
 
-    # Modify the threshold for species difference to cultivate diversity
-    if dynamic_speciation:
-        dynamic_speciation(species_count)
+        # Count the number of viable species
+        true_count = 0
+        for i in range(species_count):
+            if len(species[f'species_{i+1}_list']) >= 4:
+                true_count += 1
 
-    print(f'Thereshold: {np.round((threshold), 3)}')
+        # Modify the threshold for species difference to maintain diversity
+        if true_count < 5 or true_count > 10:
+            dynamic_speciation(true_count)
+            species_count, representatives, species = speciate_population(settings['threshold'], pop)
+
+    # Speciate using KMeans clustering
+    else:
+        species_count = settings['num_kmeans_clusters']
+        kmeans = KMeans(n_clusters=species_count, random_state=0, n_init="auto")
+        kmeans.fit(pop)
+
+        for i in range(species_count):
+            species[f'species_{i+1}_list'] = []
+
+        for j in range(len(pop)):
+            species[f'species_{kmeans.labels_[j]+1}_list'].append(pop[j])
 
     return species_count, representatives, species
 
@@ -768,36 +756,7 @@ def reseed_event(pop, fit_scores):
 ##### Evolutionary Algorithm for Neural Network Parameters #####
 
 # Set up an envolutionary learning process based on the style of EA and the number of generations
-def training_run(mutagenic_temperature, mutation_intensity, mutation_reset, discrete, crossover_line, 
-                 individual_cross, reproduce_steady, comma_strategy, reseed_cycle, elitism, half, curve_parents, 
-                 speciate, threshold, speciation_frequency, prioritize_life, prioritize_time, objective_switchpoint, 
-                 generalist, evolutionary_programming, differential_evolution, scaling_factor, 
-                 particle_swarm_optimization, pop):
-    
-    globals() ['particle_swarm_optimization'] = particle_swarm_optimization
-    globals() ['evolutionary_programming'] = evolutionary_programming
-    globals() ['differential_evolution'] = differential_evolution
-    globals() ['mutagenic_temperature'] = mutagenic_temperature
-    globals() ['objecive_switchpoint'] = objective_switchpoint
-    globals() ['speciation_frequency'] = speciation_frequency
-    globals() ['mutation_intensity'] = mutation_intensity
-    globals() ['reproduce_steady'] = reproduce_steady
-    globals() ['individual_cross'] = individual_cross
-    globals() ['prioritize_life'] = prioritize_life
-    globals() ['prioritize_time'] = prioritize_time
-    globals() ['scaling_factor'] = scaling_factor
-    globals() ['crossover_line'] = crossover_line
-    globals() ['mutation_reset'] = mutation_reset
-    globals() ['comma_strategy'] = comma_strategy
-    globals() ['curve_parents'] = curve_parents
-    globals() ['reseed_cycle'] = reseed_cycle
-    globals() ['generalist'] = generalist
-    globals() ['threshold'] = threshold
-    globals() ['discrete'] = discrete
-    globals() ['speciate'] = speciate
-    globals() ['elitism'] = elitism
-    globals() ['half'] = half
-    
+def training_run(pop):
     mean_stat = [0]
     st_devs = [0]
     upper_avg_stat = [0]
@@ -806,44 +765,51 @@ def training_run(mutagenic_temperature, mutation_intensity, mutation_reset, disc
     best = 0
 
     # Initialize the population in a manner fitting the EA approach
-    if len(pop) == 0 and not evolutionary_programming and not particle_swarm_optimization:
+    if len(pop) == 0 and not settings['evolutionary_programming'] and not settings['particle_swarm_optimization']:
         pop = initialize_population(pop_size, num_vars)
-    elif evolutionary_programming:
+
+    elif settings['evolutionary_programming']:
         pop, perturbation_vectors = initialize_population_EP(pop_size, num_vars)
-    elif particle_swarm_optimization:
+
+    elif settings['particle_swarm_optimization']:
         if len(pop) == 0:
             pop = initialize_population(pop_size, num_vars)
-        velocity_vectors = initialize_population(pop_size, num_vars)
+
+        velocity_vectors = initialize_population(pop_size, num_vars, 0.2)
         previous_bests = np.zeros((pop_size, num_vars))
         previous_scores = np.zeros(pop_size)
         global_best = np.zeros((1, num_vars))
         best_score = 0
 
     # Loop through the selection and reproduction processes
-    for g in range(generations):
+    for g in range(settings['generations']):
 
-        if evoman:
+        if settings['evoman']:
 
-            if objective_switchpoint != False and objective_switchpoint == g:
+            if settings['objective_switchpoint'] != False and settings['objective_switchpoint'] == g:
                 print('switch')
-                globals() ['prioritize_life'] = False
-                globals() ['prioritize_time'] = False
+                settings['prioritize_life'] = False
+                settings['prioritize_time'] = False
 
             if g == 0:
                 # Run simulation of the game with each individual 
-                fit_scores, maxi, ind, lives, gametimes = test_population(pop)
+                fit_scores, maxi, ind, lives, gametimes, gains = test_population(pop)
                 
-                if prioritize_life:
+                if settings['prioritize_life']:
                     fit_scores = lives
-                elif prioritize_time:
+                elif settings['prioritize_time']:
                     fit_scores = gametimes
+                elif settings['prioritize_gains']:
+                    fit_scores = gains
 
             maxi = max(fit_scores)
             ind = list(fit_scores).index(maxi)
-
+            
         # Keep track of the best set of parameters so far
-        if np.round(maxi, decimals=2) > max(performance) or (type(objective_switchpoint) == int and np.round(maxi, decimals=2) > max(performance[objective_switchpoint:])):
+        if np.round(maxi, decimals=2) > max(performance) or (type(settings['objective_switchpoint']) == int and settings['objective_switchpoint'] <= g 
+                                                             and np.round(maxi, decimals=2) > max(performance[settings['objective_switchpoint']:])):
             best = pop[ind]
+            discovery_gen = g
 
         # Sort the population by their scores
         pop, fit_scores = sort(pop, fit_scores)
@@ -858,16 +824,16 @@ def training_run(mutagenic_temperature, mutation_intensity, mutation_reset, disc
         mean_stat.append(np.round(np.mean(fit_scores), decimals=2))
         st_devs.append(st_dev)
 
-        if g == int(generations / 2):
-            globals() ['midpoint'] = True
+        if g == int(settings['generations'] / 2):
+            settings['midpoint'] = True
 
-        if reseed_cycle and g % 20 == 9:
+        if settings['reseed_cycle'] and g % 20 == 10:
             pop = reseed_event(pop, fit_scores)
 
         # Set up probabilities based on relative fitness
-        if prioritize_life:
+        if settings['prioritize_life']:
             fit_scores_norm = fit_scores
-        elif prioritize_time:
+        elif settings['prioritize_time']:
             fit_scores_norm = normalize(np.array(fit_scores))
         else:
             fit_scores_norm = evo_normalize(fit_scores)
@@ -875,60 +841,71 @@ def training_run(mutagenic_temperature, mutation_intensity, mutation_reset, disc
         probabilities = relative_prob(fit_scores_norm)
         
         # Run the chosen type of reproduction
-        if reproduce_steady: 
+        if settings['reproduce_steady']: 
             pop, fit_scores = reproduce_steady_pop(pop, probabilities, fit_scores)
-        elif comma_strategy: 
+
+        elif settings['comma_strategy']: 
             pop, fit_scores = reproduce_comma_strategy(pop, probabilities, fit_scores)
-        elif evolutionary_programming: 
+
+        elif settings['evolutionary_programming']: 
             pop, perturbation_vectors, fit_scores = reproduce_EP(pop, perturbation_vectors)
-        elif differential_evolution: 
-            pop, fit_scores = reproduce_differential_evolution(pop)
-        elif particle_swarm_optimization: 
+
+        elif settings['differential_evolution']: 
+            pop, fit_scores = reproduce_differential_evolution(pop, fit_scores)
+
+        elif settings['particle_swarm_optimization']: 
             pop, velocity_vectors, previous_bests, fit_scores, global_best, best_score = vector_shift_PSO(pop, velocity_vectors, previous_bests, 
-                                                                                                                previous_scores, global_best, best_score)
-        elif speciate and g != 0: 
-            pop, species = reproduce_by_species(pop, g, species)
-        elif speciate: 
-            pop, species = reproduce_by_species(pop, g)
+                                                                                                            previous_scores, global_best, best_score)
+        
+        elif settings['speciate'] and g == 0: 
+            pop, species, fit_scores, species_count = reproduce_by_species(pop, g)
+
+        elif settings['speciate']: 
+            pop, species, fit_scores, species_count = reproduce_by_species(pop, g, species_count, species)
+
         else: 
             pop, fit_scores = reproduce_generational(pop, probabilities, fit_scores)
 
-        if g%5 == 0:
-            print(f"Generation {g+1} top 10% avg: {np.round(upper_avg, decimals=2)}")
+
+        print(f"Generation {g+1} top 10% avg: {np.round(upper_avg, decimals=2)}, Full avg: {np.round(np.mean(fit_scores), decimals=2)}")
 
         # Stop the experiment if performance has crossed threshold
-        if upper_avg >= 97 and not prioritize_time:
-            globals() ['early_stop'] = True
+        if upper_avg >= 97 and not settings['prioritize_time'] and not settings['objective_switchpoint']:
+            settings['early_stop'] = True
             print(performance)
             print(max(performance))
-            return best, mean_stat, performance, upper_avg_stat, st_devs, pop
+            return best, discovery_gen, mean_stat, performance, upper_avg_stat, st_devs, pop
 
     print(performance)
-    print(max(performance))
+    print(f"Best Discovered in Generation {discovery_gen+1}")
+    pop, fit_scores = sort(pop, fit_scores)
     
-    return best, mean_stat, performance, upper_avg_stat, st_devs, pop
+    return best, discovery_gen, mean_stat, performance, upper_avg_stat, st_devs, pop
 
 
 ##### Evoman EA Training #####
 
 # Train a specilist or generalist agent through the EA framework against the selected bosses all experiment parameters 
 # are specified as parameters
-def evoman_train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=1, 
-              mutation_reset=False, discrete=False, crossover_line=False, individual_cross=False, 
-              reproduce_steady=False, comma_strategy=False, reseed_cycle=False, elitism=False, 
-              half=False, curve_parents=False,speciate=False, threshold=False, speciation_frequency=False, 
-              prioritize_life=False, prioritize_time=False, objective_switchpoint=False,
-              generalist=False, evolutionary_programming=False, differential_evolution=False, 
-              scaling_factor=False, particle_swarm_optimization=False, pop=[], enemy_set=[1,2,3,4,5,6,7,8], 
-              runs=1, save=True):
+def evoman_train_set(string, pop, runs, save, **kwargs):
 
-    times = {enemy: [] for enemy in enemy_set}
-    globals() ['last_boss'] = enemy_set[-1]
+    for key, value in kwargs.items():
+        if key in settings:
+            settings[key] = value
+        
+        else:
+            raise ValueError(f"Unknown setting: {key}")
+        
+    global pop_size
+    pop_size = settings['pop_size']
+    
+    times = {enemy: [] for enemy in settings['set']}
+    settings['last_boss'] = settings['set'][-1]
 
-    if multiple_mode:
+    if settings['multiple_mode']:
         enemies = [0]
     else:
-        enemies = enemy_set
+        enemies = settings['set']
     
     # Iterate through each boss
     for j in enemies:
@@ -937,23 +914,14 @@ def evoman_train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=
         for run in range(0, runs):
 
             # Set up environment and complete one training run
-            if multiple_mode:
-                env.enemies = enemy_set
+            if settings['multiple_mode']:
+                env.enemies = settings['set']
                 env.multiplemode = "yes"
-            
-            start_time = time.perf_counter_ns()
 
-            best, mean_stat, performance, upper_avg_stat, st_dev, pop = training_run(mutagenic_temperature, mutation_intensity, 
-                                                                                     mutation_reset, discrete, crossover_line, individual_cross, 
-                                                                                     reproduce_steady, comma_strategy, reseed_cycle, elitism, half, 
-                                                                                     curve_parents, speciate, threshold, speciation_frequency, 
-                                                                                     prioritize_life, prioritize_time, objective_switchpoint, 
-                                                                                     generalist, evolutionary_programming, differential_evolution,
-                                                                                     scaling_factor, particle_swarm_optimization, pop)
+            best, discovery_gen, mean_stat, performance, upper_avg_stat, st_dev, pop = training_run(pop)
+
             # Test the winning parameters
             print(f'Test score is {env.play(pcont=best)}')
-            runtime = time.perf_counter_ns() - start_time
-            times[enemy_set[1]].append(runtime)
             
             # Save all the important stats in the specified folder
             if save:
@@ -974,22 +942,31 @@ def evoman_train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=
                 for run in range(0, len(times[enemy])):
                     writer.writerow([enemy, run, times[enemy][run]])
 
+    return pop
+
 # Test a set of NN parameters from the stored csv file
-def evoman_test_params(string, attempts=1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=False, generalist=False):
+def evoman_test_params(string, attempts=1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=False, visuals=False):
 
     set_of_performances = []
     set_of_life = []
+    set_of_gains = []
+
     # Set up the environment params and game statistics
     for j in set:
 
         # switch off for testing
-        if multiple_mode:
+        if settings['multiple_mode']:
             env.multiplemode = "no"
+
+        if visuals:
+            env.visuals = True
+            env.speed = "normal"
 
         env.enemies = [j]
         performance = []
         avg_enemy_life = []
         avg_life = []
+        avg_gains = []
         avg_time = []
 
         # Test parameters from each separate experiment
@@ -999,37 +976,42 @@ def evoman_test_params(string, attempts=1, set=[1,2,3,4,5,6,7,8], experiment_cou
             life_left = []
             gametimes = []
             enemy_life = []
+            gains = []
             win_count = 0
 
             # Get the right parameters
-            if generalist:
-                if multiple_mode:
+            if settings['generalist']:
+                if settings['multiple_mode']:
                     best_params = pd.read_csv(f"{stat_directory}_{string}/{string}_{0}_{run}_Params.csv", delimiter=",", header=None)
                 else:
-                    best_params = pd.read_csv(f"{stat_directory}_{string}/{string}_{last_boss}_{run}_Params.csv", delimiter=",", header=None)
+                    best_params = pd.read_csv(f"{stat_directory}_{string}/{string}_{settings['last_boss']}_{run}_Params.csv", delimiter=",", header=None)
             else:    
                 best_params = pd.read_csv(f"{stat_directory}_{string}/{string}_{j}_{run}_Params.csv", delimiter=",", header=None)
             
-            # Sheds sigma values in cases with variation coded into the genetics
+            # Shed sigma values for cases with variation coded into the genetics
             params = best_params.iloc[:num_vars,0]
 
-            # Complete the number of runs for the boss and stores the statitics
+            # Complete the number of runs for the boss and store the statitics
             for _ in range(attempts):   
                 
                 fit, p_life, e_life, gametime = env.play(pcont=np.array(params))
+                gain = p_life - e_life
                 
                 if e_life == 0:
                     win_count += 1
 
                 print(f'Boss {j}, run {np.round(run,2)}, fitness score {np.round(fit,2)}, player life {np.round(p_life,2)}, enemy life {np.round(e_life,2)}, runtime {gametime}')
+                
                 scores.append(fit)
                 life_left.append(p_life)
                 gametimes.append(gametime)
+                gains.append(gain)
                 enemy_life.append(e_life)
 
             performance.append(np.mean(np.array(scores)))
             avg_enemy_life.append(np.mean(np.array(enemy_life)))
             avg_life.append(np.mean(np.array(life_left)))
+            avg_gains.append(np.mean(np.array(gains)))
             avg_time.append(np.mean(np.array(gametimes)))
 
             # Save stats from individual experiments
@@ -1037,26 +1019,42 @@ def evoman_test_params(string, attempts=1, set=[1,2,3,4,5,6,7,8], experiment_cou
                 np.savetxt(f"{stat_directory}_{string}/{string}_{j}_{run}_Fit_Scores.csv", scores, delimiter=",")
                 np.savetxt(f"{stat_directory}_{string}/{string}_{j}_{run}_Enemy_Life.csv", enemy_life, delimiter=",")
                 np.savetxt(f"{stat_directory}_{string}/{string}_{j}_{run}_Player_Life.csv", life_left, delimiter=",")
+                np.savetxt(f"{stat_directory}_{string}/{string}_{j}_{run}_Gains.csv", gains, delimiter=",")
                 np.savetxt(f"{stat_directory}_{string}/{string}_{j}_{run}_Gametime.csv", gametimes, delimiter=",")
+
 
         # Save stats from averages of experiments
         if save:
             np.savetxt(f"{stat_directory}_{string}/{string}_{j}_avg_Fit_Scores.csv", performance, delimiter=",")
             np.savetxt(f"{stat_directory}_{string}/{string}_{j}_avg_Enemy_Life.csv", avg_enemy_life, delimiter=",")
             np.savetxt(f"{stat_directory}_{string}/{string}_{j}_avg_Player_Life.csv", avg_life, delimiter=",")
+            np.savetxt(f"{stat_directory}_{string}/{string}_{j}_avg_Gains.csv", avg_gains, delimiter=",")
             np.savetxt(f"{stat_directory}_{string}/{string}_{j}_avg_Gametime.csv", avg_time, delimiter=",")
 
         set_of_performances.append(np.round(np.mean(performance),2))
         set_of_life.append(np.round(np.mean(avg_life),2))
+        set_of_gains.append(np.round(np.mean(avg_gains),2))
 
-    return set_of_performances, set_of_life
+    print(f'Average of Fit Scores: {np.round(np.mean(set_of_performances),2)} and Gains: {np.round(np.mean(set_of_gains),2)}')
+
+    return set_of_performances, set_of_life, set_of_gains
+
+env = Environment(experiment_name=experiment_name,
+                            playermode="ai",
+                            enemies=[1],
+                            player_controller=player_controller(n_hidden_neurons),
+                            speed="fastest",
+                            enemymode="static",
+                            level=2,
+                            visuals=False)
 
 # Run the grid search algorithm
 if __name__ == '__main__':
     
     performances = []
     avg_lives = []
-    combinations = [list(comb) for comb in itertools.combinations(range(1,9), 4)]
+    groups1 = [list(comb) for comb in itertools.combinations(range(1,9), 4)]
+    groups2 = [list(comb) for comb in itertools.combinations(range(1,9), 3)]
 
     # Initialize the game environment
     env = Environment(experiment_name=experiment_name,
@@ -1067,72 +1065,28 @@ if __name__ == '__main__':
                             enemymode="static",
                             level=2,
                             visuals=False)
-    
 
-    # Test all combinations of 4
-    for group in combinations:
+    full_groups = itertools.chain(groups1, groups2)
+    for group in full_groups:
         print(f'Combination: {group}')
-        filename = f'GENERALIST_GRID_{group}'
+        filename = f'GENERALIST_GRID7_{group}'
 
         if not os.path.exists(f'{stat_directory}_{filename}'):
             os.makedirs(f'{stat_directory}_{filename}')
 
         # Train New GAs
-        evoman_train_set(filename, mutagenic_temperature, mutation_intensity, mutation_reset, discrete, crossover_line, 
-                            individual_cross, reproduce_steady, comma_strategy, reseed_cycle, elitism, half, curve_parents,
-                            speciate, threshold, speciation_frequency, prioritize_life, prioritize_time, objective_switchpoint, 
-                            generalist, evolutionary_programming, differential_evolution, scaling_factor, particle_swarm_optimization, 
-                            pop, group, runs, save)
+        evoman_train_set(filename, pop, set=group, runs=runs, save=save)
 
         # Test the best parameters
-        performance, avg_life = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, generalist=generalist, save=True)
+        performance, avg_life, avg_gain = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], save=True)
 
         performances.append(performance)
         avg_lives.append(avg_life)
 
     for i in range(len(performances)):
-        print(f'Combination {combinations[i]}')
+        print(f'Combination {full_groups[i]}')
         print(f'Fit Scores: {performances[i]}')
         print(f'Fit Scores avg: {np.mean(performances[i])}')
         print(f'Player Life: {avg_lives[i]}')
         print(f'Player Life avg: {np.mean(avg_lives[i])}')
-    
-    if save:
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Fit_Scores_4.csv", performances, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Player_Life_4.csv", avg_lives, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Combo_Key_4.csv", combinations, delimiter=",")
-
-    performances2 = []
-    avg_lives2 = []
-    combinations2 = [list(comb) for comb in itertools.combinations(range(1,9), 3)]
-
-    # Test all combinations of 3
-    for group in combinations:
-        print(f'Combination: {group}')
-        filename = f'GENERALIST_GRID_{group}'
-
-        # Train New GAs
-        evoman_train_set(filename, mutagenic_temperature, mutation_intensity, mutation_reset, discrete, crossover_line, 
-                            individual_cross, reproduce_steady, comma_strategy, reseed_cycle, elitism, half, curve_parents,
-                            speciate, threshold, speciation_frequency, prioritize_life, prioritize_time, objective_switchpoint, 
-                            generalist, evolutionary_programming, differential_evolution, scaling_factor, particle_swarm_optimization, 
-                            pop, group, runs, save)
-
-        # Test the best parameters
-        performance, avg_life = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, generalist=generalist, save=True)
-
-        performances.append(performance)
-        avg_lives.append(avg_life)
-
-    for i in range(len(performances)):
-        print(f'Combination {combinations[i]}')
-        print(f'Fit Scores: {performances[i]}')
-        print(f'Fit Scores avg: {np.mean(performances[i])}')
-        print(f'Player Life: {avg_lives[i]}')
-        print(f'Player Life avg: {np.mean(avg_lives[i])}')
-    
-    if save:
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Fit_Scores_3.csv", performances2, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Player_Life_3.csv", avg_lives2, delimiter=",")
-        np.savetxt(f"{stat_directory}_{filename}/GridSearch_Combo_Key_3.csv", combinations2, delimiter=",")
 
