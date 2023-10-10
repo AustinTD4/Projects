@@ -18,6 +18,14 @@ This project relies on the following libraries:
 - `Pygame`
 - `scikit-learn`
 
+## Evoman
+
+Evoman features eight unique enemies, each capable of providing a fitness score for the player during gameplay. The scoring considers player life, enemy life, and game time.
+
+### Generalist Algorithm
+
+This experiment aimed to engineer an agent using evolutionary computing, enabling it to overcome all eight enemies, despite only training against 3-4 of them.
+
 ## Installation & Setup for Reproducing Evoman Results
 1. **Install the required libraries**:
 pip install numpy pandas pygame scikit-learn
@@ -87,16 +95,4 @@ The compatibility matrix for the Evolutionary Algorithm parameters is as follows
 | Differential Evolution                  | 🟡                | 🟡                   | 🟡                     | ✅      | ❌              | ❌            | ❌           | 🟡     | 🟡      | 🟡                  | ✅            | ❌          |
 | Particle Swarm Optimization             | 🟡                | 🟡                   | 🟡                     | ❌      | ❌              | ❌            | ❌           | 🟡     | 🟡      | 🟡                  | 🟡            | ❌          |
 
-## Evoman
 
-Evoman features eight unique enemies, each capable of providing a fitness score for the player during gameplay. The scoring considers player life, enemy life, and game time.
-
-### Generalist Algorithm
-
-This experiment aimed to engineer an agent using evolutionary computing, enabling it to overcome all eight enemies, despite only training against 3-4 of them.
-
-**Procedure:**
-
-1. **Grid Search through enemy combinations**
-   - Investigate all enemy combinations for 20 generations using an efficient approach [Generational Reproduction, Weighted Avg, Curve Parents, Elitism=1].
-   - Analyze outcomes and cherry-pick the optimal combinations for in-depth testing.
