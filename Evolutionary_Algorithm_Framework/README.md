@@ -4,14 +4,6 @@ The program leverages the Pygame Framework for Evoman, a rendition of the popula
 
 > **Applications:** This tool can be used in any environment where actions can be mapped to a Neural Network in real-time, which consequently produces a performance metric. The algorithms generated represent sets of parameters for a neural network, which can contain additional genotype information, contingent upon the employed strategy.
 
-## Framework
-
-This framework is designed for modularity, making it adaptable beyond Evoman. To employ this framework for other applications:
-1. Modify the simulation to function in the new environment.
-2. Adjust the Neural Network shape accordingly.
-
-Evolutionary algorithms will then produce parameters suitable for any given Neural Network shape.
-
 ## Requirements
 
 - **Python**: 3.x
@@ -25,8 +17,7 @@ This project relies on the following libraries:
 - `Pandas`
 - `Pygame`
 
-## Installation & Setup for Reproducing Evoman Experiments
-
+## Installation & Setup for Reproducing Evoman Results
 1. **Install the required libraries**:
 pip install numpy pandas pygame
 
@@ -40,8 +31,28 @@ cd Evolutionary_Algorithm_Framework
 Grid_Search_Generalist.py
 
 5. **Run the in-depth analysis**:
-Tuning_Generalist.py
+Test_Selection_Recombination_Mutation.py
 
+### FILES:
+
+- **Demo_Controller.py**: Maps the neural network outputs to commands in Evoman.
+- **Grid_Search_Generalist.py**: Runs an experiment where all possible combinations of 3 and 4 enemies are tested for training a generalist agent. Results are saved to csv files.
+- **Test_Selection_Recombination_Mutation.py**: Tests possible selection, recombination, and mutation parameters on on the best performing groups of enemy training combinations.
+- **Starter_Culture_Test.py**: Runs an alternate approach where populations were trained against a single boss, merged, and merged again, adding the number of enemies trained on with each layer. Each new population begins with a "Starter Culture", a concatenation of multiple populations evolved against individual enemies respectively. After the final population set is combined, differential evolution is applied for 50 generations.
+- **Culminating_Experiment.py**:
+
+### FOLDERS:
+
+- **evoman**: Contains the environment and dependencies for evoman, a game based on Megaman, designed in pygame by VU faculty.
+- **experiments_evoman**: Contains csv files with the experiment results.
+
+## Framework
+
+This framework is designed for modularity, making it adaptable beyond Evoman. To employ this framework for other applications:
+1. Modify the simulation to function in the new environment.
+2. Adjust the Neural Network shape accordingly.
+
+Evolutionary algorithms will then produce parameters suitable for any given Neural Network shape. This transfer could be done in roughly one hour of changes, depending on the environment.
 
 ### Compatibility Matrix
 
