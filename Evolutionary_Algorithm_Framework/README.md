@@ -16,10 +16,11 @@ This project relies on the following libraries:
 - `Numpy`
 - `Pandas`
 - `Pygame`
+- `scikit-learn`
 
 ## Installation & Setup for Reproducing Evoman Results
 1. **Install the required libraries**:
-pip install numpy pandas pygame
+pip install numpy pandas pygame scikit-learn
 
 2. **Clone the repository**:
 git clone https://github.com/AustinTD4/Projects.git
