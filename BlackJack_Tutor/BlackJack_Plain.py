@@ -497,7 +497,7 @@ class blackjack_color():
             self.traditional_blackjack(pair=True,soft=False,deck_num=False)
         elif re.search('^[jJ]|^[jJ]ack|^[bB]lack[jJ]ack|^3', selection):
             self.deck_num = input("Please Select Standard Type Or Indicate The Number Of Decks You Want To Play With\n")
-            if self.deck_num.isnumeric() != True: 
+            if not self.deck_num.isnumeric(): 
                 self.deck_num = False
             elif int(self.deck_num) == 1: 
                 self.deck_num = int(self.deck_num) 
@@ -521,4 +521,7 @@ class blackjack_color():
                 self.play(False)
         else: 
             print("I don't understand, Terminating...")            
-        
+
+if __name__ == '__main__':
+    jack = blackjack_color()
+    jack.run()
