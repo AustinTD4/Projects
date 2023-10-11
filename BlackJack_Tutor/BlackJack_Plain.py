@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 13 11:13:34 2023
+###############################################
+#      A Text-Based BlackJack Strategy Tutor  #
+#       By Austin Dickerson                   #
+#       April 12, 2023                        #
+###############################################
 
-@author: Austin Dickerson
-"""
 import os, time, random, re, pygame
 import numpy as np
 from gtts import gTTS
