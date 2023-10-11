@@ -81,10 +81,10 @@ class blackjack_color():
         card = self.card_list[index]   
 
         #Returns card if the user has elected not to specify the number of decks to play with  
-        if deck_num == False:
-            if name == False and key == False: 
+        if not deck_num:
+            if not name and not key: 
                 return value
-            elif key == False: 
+            elif not key: 
                 return value, card
             else: 
                 return value, card, index
@@ -190,7 +190,7 @@ class blackjack_color():
         if re.search('[hH]it|[hH]|2', choice): 
             self.player_hits(pair)            
         elif re.search('[sS]tay|[sS]|1', choice):
-            if pair == True : return
+            if pair: return
             else: 
                 self.player_stands()
         else: 
@@ -221,17 +221,18 @@ class blackjack_color():
     
     #Offers the player their possible moves, given the game state
     def determine_choice(self, pair=True, choice=False):
-        if pair == True and choice == False: 
+        if pair and not choice: 
             choice = input("Will You Stay, Hit, Double, Or Split?[s,h,d,sp] Main Menu[m]\n")
-        elif choice == False: 
+        elif not choice: 
             choice = input("Will You Stay, Hit, Or Double? [s,h,d]   Main Menu [m]\n")
             
         if re.search('^[sS]$|^[sS]tay|^1', choice): selection = 1
         elif re.search('^[hH]|^[hH]it|^2', choice): selection = 2
         elif re.search('^[dD]|^[dD]ouble|^3', choice): selection = 3
-        elif re.search('^[sS]plit|^4|^[sS]p$', choice) and pair == True: selection = 4
+        elif re.search('^[sS]plit|^4|^[sS]p$', choice) and pair: selection = 4
         elif re.search('^[eE]|^[eE]nd|^5|[qQ]|[qQ]uit|^[mM]|[mM]enu|^[mM]ain', choice): selection = 5
-        else: selection = self.determine_choice(pair)        
+        else: selection = self.determine_choice(pair)   
+            
         return selection
     
     #Calls the right method given the player's choice
@@ -258,7 +259,7 @@ class blackjack_color():
     def resolve_from_split(self, tally, value, name, second=False, double=False):
         self.player_total = tally + value
         self.script2 += name
-        if double == False: 
+        if not double: 
             self.player_hits(True)
         else: 
             self.player_doubles_down(True)
@@ -271,7 +272,7 @@ class blackjack_color():
             compensate += 1        
 
         if self.player_total > 21:
-            if second == False: 
+            if not second: 
                 print(Fore.BLUE+Style.BRIGHT+self.counter[0+self.multi_split]+" Hand Bust\n")
             else: 
                 print(Fore.BLUE+Style.BRIGHT+self.counter[1+self.multi_split]+" Hand Bust\n")                
@@ -352,7 +353,7 @@ class blackjack_color():
             self.generate_decks(self.deck_num)   
 
         #Checks how many cards in the deck stack remain        
-        while self.active == True:
+        while self.active:
             self.hands = []
             self.multi = 0
             if deck_num != False: 
@@ -368,10 +369,10 @@ class blackjack_color():
                     self.refresh_decks()
                 
             #Generates cards for the player's hand
-            if pair == True:
+            if pair:
                 value1, card1, key1 = self.generate_card(True,True)
                 value2,card2 = value1, card1
-            elif soft == True:
+            elif soft:
                 value1, card1, key1 = self.generate_card(True,True)
                 value2, card2 = 11, "Ace"
             else:
@@ -433,11 +434,11 @@ class blackjack_color():
     #Produces starting states for a hand, letting the player quickly practice strategy
     def flashcards(self, soft=False, pair=False):
         #Generates starting hands
-        while self.active == True:
+        while self.active:
             self.count += 1
             value1, card1, key1 = self.generate_card(True,True)
-            if pair == True : value2, card2 = value1, card1
-            elif soft == True : value2, card2 = 11, "Ace"
+            if pair: value2, card2 = value1, card1
+            elif soft: value2, card2 = 11, "Ace"
             else:
                 value1, card1, key1 = self.generate_card(True,True,11)
                 value2, card2, key2 = self.generate_card(True,True,11)
@@ -449,9 +450,9 @@ class blackjack_color():
             selection = self.determine_choice(pair=pair)
             
             #Determines optimal action
-            if soft == True: 
+            if soft: 
                 actual = self.soft_key[value1-2][dealer3]
-            elif pair == True: 
+            elif pair: 
                 actual = self.pair_key[key1][dealer3]
             else: 
                 actual = self.hard_key[value1+value2-4][dealer3]
@@ -482,7 +483,7 @@ class blackjack_color():
         self.deck_num = False
 
         #Gives an introduction if needed
-        if first == True:
+        if first:
             init(autoreset=True)
             welcome = "Welcome to the Tutorial Blackjack Simulator"
             self.read_string(welcome) 
