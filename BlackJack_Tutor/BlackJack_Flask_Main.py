@@ -1,8 +1,6 @@
-import os, random, time, socket, pygame
+import os, random, time, socket
 from flask import Flask, jsonify, request, render_template, make_response
-from gtts import gTTS
 from BlackJack_Plain import blackjack_color
-from io import BytesIO
 
 #Initializes the blackjack object, which contains the majority of variables and methods needed to play
 bj = blackjack_color()
@@ -31,27 +29,10 @@ ace_paths = ["static/images/ace_of_clubs.png", "static/images/ace_of_diamonds.pn
 app = Flask(__name__)
 
 
-def read_string(input_string):
-    # Create in-memory binary stream and saves audio
-    fp = BytesIO()
-    tts = gTTS(text=input_string, lang='en')
-    tts.write_to_fp(fp)
-    
-    #Resets the pointer of the in-memory binary stream to the beginning and plays sound
-    fp.seek(0)
-    pygame.mixer.init()
-    pygame.mixer.music.load(fp)
-    pygame.mixer.music.play()
-
-    #Keeps the program running until audio playback is finished
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
-    pygame.mixer.quit()
-
 #Reads next move aloud
 def do_action(button_id):
     responses = ['Stay','Hit','Double Down','Pair Splitting', 'Exiting...', 'Standard Cards', 'Soft Hands Only', 'Pairs Only']
-    read_string(responses[button_id-1])
+    bj.read_string(responses[button_id-1])
 
 #Opens initial HTML page
 @app.route('/')
@@ -82,7 +63,7 @@ def button_click():
 
         #In the case of a split, this stores important information about the latest hand and prepares to send the next hand to the HTML page
         if split == True and handNum != 1:
-            read_string("Next Hand")
+            bj.read_string("Next Hand")
             bj.hands.append(bj.player_total)
             bj.player_total = int(values[0] + value)
             copy1 = cards2[0]
@@ -109,16 +90,16 @@ def button_click():
 
             #Checks for a dealer 'Blackjack'
             if bj.dealer_total == 21 and len(cards1) == 2: 
-                read_string("BlackJack! Dealer Wins")
+                bj.read_string("BlackJack! Dealer Wins")
                 bj.dealer_total = 0
 
             #Checks to see who won the hand
             if bj.dealer_total > 16 and bj.dealer_total < 22 and split == False:
                 if bj.dealer_total > bj.player_total: 
-                    read_string("Dealer Wins")
+                    bj.read_string("Dealer Wins")
                     bj.dealer_total = 0
                 elif bj.dealer_total == bj.player_total: 
-                    read_string("Push, Nobody Wins")
+                    bj.read_string("Push, Nobody Wins")
                     bj.dealer_total = 0
                     if bj.double_bet == True:
                         bj.net += 2
@@ -130,7 +111,7 @@ def button_click():
                         bj.net += 4
                     else:
                         bj.net += 2
-                    read_string("Player Wins!")
+                    bj.read_string("Player Wins!")
                     bj.dealer_total = 0
 
             #Checks if the dealer has aces and needs their hand total modified
@@ -139,7 +120,7 @@ def button_click():
                 num1.pop(num1.index(12))
             #Checks for the dealer busting
             if bj.dealer_total > 21: 
-                read_string("Dealer Busts")
+                bj.read_string("Dealer Busts")
                 bj.hand_wins += 1
                 if bj.double_bet == True:
                     bj.net += 4
@@ -164,7 +145,7 @@ def button_click():
             num2copy.pop(num2copy.index(12))
         #Checks for a bust
         if bj.player_total > 21:
-            read_string("Player Busts")
+            bj.read_string("Player Busts")
             bj.player_total = 0
         sending = {'imagePaths' : cards2, 'hand_total' : bj.player_total, 'net' : bj.net}
 
@@ -196,14 +177,14 @@ def button_click():
                 num2copy.pop(num2copy.index(12))
             #Checks for a bust
             if bj.player_total > 21:
-                read_string("Player Busts")
+                nj.read_string("Player Busts")
                 bj.player_total = 0
             sending = {'imagePaths' : cards2, 'hand_total' : bj.player_total, 'net' : bj.net}
             #Returns the image paths and relevant tallies to the HTML page
             return jsonify(sending)
         else:
             #Handles case of the move being invalid
-            read_string("You Cannot Double Now")
+            bj.read_string("You Cannot Double Now")
             return make_response('', 200)
     
     #Handles the player splitting a pair
@@ -219,15 +200,15 @@ def button_click():
             return jsonify(sending)
         else:
             #Handles the case of the split choice being invalid
-            read_string("Not a Pair")
+            bj.read_string("Not a Pair")
             return make_response('', 200)
         
     #Handles the player selecting 'Quit'
     elif button_id == 5:
         #Reads aloud a grading of the player's decision making, hand outcomes, and financial position
-        read_string("Your decision making was "+str(bj.correct)+" out of "+str(bj.count)+". Which is "+str(int((bj.correct/bj.count)*100))+" percent.")
-        read_string("You won "+str(int((bj.hand_wins/max(1,bj.hand_count-1))*100))+" percent of your hands.")
-        read_string("You started with 10 credits and now you have "+str(bj.net)+" credits.")
+        bj.read_string("Your decision making was "+str(bj.correct)+" out of "+str(bj.count)+". Which is "+str(int((bj.correct/bj.count)*100))+" percent.")
+        bj.read_string("You won "+str(int((bj.hand_wins/max(1,bj.hand_count-1))*100))+" percent of your hands.")
+        bj.read_string("You started with 10 credits and now you have "+str(bj.net)+" credits.")
         time.sleep(1)
         #Displays an ending image on the HTML page
         sending = {'imagePaths': [cardback,cardback,cardback,cardback,cardback,cardback], 'hand_total' : bj.player_total}
@@ -259,7 +240,7 @@ def get_image_path_row2():
 #Resets the game state to a fresh hand after the last hand concludes
 @app.route('/reset', methods=['POST'])
 def reset():
-    read_string("Dealing...")
+    bj.read_string("Dealing...")
     initial(globals()['draw_type'])
     return make_response('', 200)
 
@@ -290,7 +271,7 @@ def send_message():
 
     #Returns message to HTML page
     if button_id != actual:
-        read_string(response)
+        bj.read_string(response)
         return jsonify({'message' : response})
     else: 
         bj.correct += 1
@@ -305,16 +286,16 @@ def call_split():
     #Compares each hand to the dealer's, reads outcomes, and tallies wins/credits won
     for i, score in enumerate(bj.hands):
         if bj.dealer_total == 0 and score != 0:
-            read_string("Hand "+str(i+1)+" Win")
+            bj.read_string("Hand "+str(i+1)+" Win")
             if bj.double_ids[i] == 1:
                 bj.net += 4
             else:
                 bj.net += 2
             bj.hand_wins += 1
         elif score < bj.dealer_total:
-            read_string("Hand "+str(i+1)+" Loss")
+            bj.read_string("Hand "+str(i+1)+" Loss")
         elif score == bj.dealer_total:
-            read_string("Hand "+str(i+1)+" Push")
+            bj.read_string("Hand "+str(i+1)+" Push")
             if bj.double_ids[i] == 1:
                 bj.net += 2
             else:
@@ -325,14 +306,14 @@ def call_split():
             else:
                 bj.net += 2
             bj.hand_wins += 1
-            read_string("Hand "+str(i+1)+" Win")
+            bj.read_string("Hand "+str(i+1)+" Win")
     return make_response('', 200)
 
 #Initializes the game state variables
 def startup(deck_num=2):
     welcome = "Welcome to the Tutorial Blackjack Simulator"
     global draw_type
-    read_string(welcome) 
+    bj.read_string(welcome) 
     print(welcome)
     draw_type = 1
     bj.deck_num = deck_num
@@ -392,7 +373,7 @@ def initial(draw_type=1):
         if bj.player_total == 21 and draw_type == 1: 
             bj.net += 2
             bj.hand_wins += 1
-            read_string("BlackJack! Next Hand")
+            bj.read_string("BlackJack! Next Hand")
             initial(draw_type)
 
     #Generates player hand with one ace and another card between 2 and 8
@@ -424,8 +405,10 @@ def available_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
         return s.getsockname()[1]
+
+if __name__ == '__main__':
     
-port = available_port()
-startup()
-initial()
-app.run(debug=False, port=port)
+    port = available_port()
+    startup()
+    initial()
+    app.run(debug=False, port=port)
