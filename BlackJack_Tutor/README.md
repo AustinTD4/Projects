@@ -50,4 +50,4 @@ startup(3)  # This will use 3 decks
 5. When playing, use `Regular`, `Soft Totals`, and `Pairs` buttons to change the type of hands you can draw.
 5. Note to not press another button before the last one has resolved
 
-**A text-based version of the game can be played by executing the BlackJack_Plain.py file, which provides the game experience without any visual interface.**
+*A text-based version of the game can be played by executing the BlackJack_Plain.py file, which provides the game experience without any visual interface.*
