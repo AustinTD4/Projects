@@ -4,14 +4,11 @@ Created on Thu Apr 13 11:13:34 2023
 
 @author: Austin Dickerson
 """
-import os
-import time
-import random
-import re
+import os, time, random, re, pygame
 import numpy as np
 from gtts import gTTS
-from playsound import playsound
 from colorama import init, Fore, Style
+from io import BytesIO
 
 class blackjack_color():
 
@@ -50,14 +47,22 @@ class blackjack_color():
     def run_flask_app(self):
         self.app.run()
         
-    #Reads aloud any text
     def read_string(self, input_string):
-        mytext = input_string
-        myobj = gTTS(text=mytext, slow=False)
-        if os.path.exists("speech.mp3") : os.remove("speech.mp3")
-        myobj.save("speech.mp3") 
-        playsound("speech.mp3") 
-        os.remove("speech.mp3")
+        # Create in-memory binary stream and saves audio
+        fp = BytesIO()
+        tts = gTTS(text=input_string, lang='en')
+        tts.write_to_fp(fp)
+    
+        #Resets the pointer of the in-memory binary stream to the beginning and plays sound
+        fp.seek(0)
+        pygame.mixer.init()
+        pygame.mixer.music.load(fp)
+        pygame.mixer.music.play()
+
+        #Keeps the program running until audio playback is finished
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+        pygame.mixer.quit()
     
     #Creates the desired number of decks at the start of the game
     def generate_decks(self, number):
