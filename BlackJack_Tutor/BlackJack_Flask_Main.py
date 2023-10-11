@@ -1,3 +1,9 @@
+###############################################
+#      A Visual BlackJack Strategy Tutor      #
+#       By Austin Dickerson                   #
+#       April 25, 2023                        #
+###############################################
+
 import os, random, time, socket
 from flask import Flask, jsonify, request, render_template, make_response
 from BlackJack_Plain import blackjack_color
