@@ -48,4 +48,6 @@ startup(3)  # This will use 3 decks
  * Running on http://127.0.0.1:1438
 ```
 5. When playing, use `Regular`, `Soft Totals`, and `Pairs` buttons to change the type of hands you can draw.
-5. Note to not press a button before the last one has resolved, or asynchronous functions can cause errors
+5. Note to not press another button before the last one has resolved
+
+**A text-based version of the game can be played by executing the BlackJack_Plain.py file, which provides the game experience without any visual interface.**
