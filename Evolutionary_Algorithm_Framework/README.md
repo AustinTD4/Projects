@@ -48,7 +48,6 @@ Test_Selection_Recombination_Mutation.py
 - **Grid_Search_Generalist.py**: Runs an experiment where all possible combinations of 3 and 4 enemies are tested for training a generalist agent. Results are saved to csv files.
 - **Test_Selection_Recombination.py**: Tests possible selection, recombination, and mutation parameters on on the best performing groups of enemy training combinations.
 - **Starter_Culture_Test.py**: Runs an alternate approach where populations were trained against a single boss, merged, and merged again, adding the number of enemies trained on with each layer. Each new population begins with a "Starter Culture", a concatenation of multiple populations evolved against individual enemies respectively. After the final population set is combined, differential evolution is applied for 50 generations.
-- **Culminating_Experiment.py**:
 
 ### FOLDERS:
 
