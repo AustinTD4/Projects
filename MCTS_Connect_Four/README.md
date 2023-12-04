@@ -31,32 +31,42 @@ pip install numpy colorama tqdm
 
 To train the AI, run the explore command with the number of games and the filename to be saved:
 
+```python
 connectFour.explore(10000000, '{filename}')
+```
 
 ### Testing the AI
 
 After training, you can test the AI's performance, selecting the number of test games and the AI's pkl file:
 
+```python
 connectFour.testPerformance(1000, '{filename}')
+```
 
 ### Human vs AI Gameplay
 
 Play against the trained AI by loading the pkl file from training:
 
+```python
 connectFour.humanPlay('{filename}')
+```
 
 ### Visualizing Performance
 
 Visualize the decision-making process of the AI by watching one game unfold with win probabilities for upcoming actions:
 
+```python
 connectFour.visualizePerformance('{filename}')
+```
 
 ### Advanced Train
 
 Create a version of the game where the opponent used to train against is playing with a previously developed AI:
 
+```python
 connectFourAdvanced = gameBoard(advancedTrain=True)
 connectFourAdvanced.explore(10000000, f'{filename}_Advanced', previousPolicy='{filename}', exploitativeSampling=True)
+```
 
 ## Contributors
 
