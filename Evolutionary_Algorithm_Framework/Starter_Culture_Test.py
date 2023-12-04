@@ -8,7 +8,7 @@
 # imports evoman and controller frameworks
 from evoman.environment import Environment
 from evoman.demo_controller import player_controller
-#from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans
 import os, random, time, csv, itertools
 import numpy as np
 import pandas as pd
