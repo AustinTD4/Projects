@@ -1,5 +1,5 @@
 #######################################
-#   DPRL Assignment 3, Connect Four   #
+#   MCTS, Connect Four                #
 #   Austin Dickerson                  #
 #######################################
 from clockManager import clockManager
@@ -469,6 +469,17 @@ class gameBoard():
 ###################################################################################################
 
 if __name__ == '__main__':
+    # Train the agent against a random computer
     connectFour = gameBoard()
     connectFour.explore(10000000, 'Test12.4_(10M)', previousPolicy=False, exploitativeSampling=True)
-    #connectFour.visualizePerformance('Test12.4_(10M)')
+
+    connectFour.visualizePerformance('Test12.4_(10M)')
+
+    # Continue training for one agent, and use the previously developed behavior as an opponent
+    connectFourAdvanced = gameBoard(advancedTrain=True)
+    connectFourAdvanced.explore(10000000, 'Test12.4_Advanced_(10M)', previousPolicy='Test12.4_(10M)', exploitativeSampling=True)
+
+    connectFourAdvanced.visualizePerformance('Test12.4_Advanced_(10M)')
+
+    # Test against a person
+    connectFour.humanPlay('Test12.4_Advanced_(10M)')
