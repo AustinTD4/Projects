@@ -17,9 +17,9 @@ This project implements a Connect Four game AI using Monte Carlo Tree Search (MC
 
 To get started with this project, clone the repository to your local machine:
 
+```conda
 git clone https://github.com/AustinTD4/Projects.git
-cd Projects
-cd MCTS_Connect_Four
+```
 
 Make sure you have Python installed on your system. The required dependencies can be installed using:
 
