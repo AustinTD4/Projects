@@ -1,3 +1,8 @@
+##################################################
+#    A Simple tool for tracking compute times    #
+#    By Austin Dickerson                         #
+##################################################
+
 import time
 import pickle
 
