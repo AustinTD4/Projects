@@ -71,7 +71,7 @@ connectFourAdvanced.explore(10000000, f'{filename}_Advanced')
 
 ## Results
 
-Utilizing the standard training protocol against a random opponent converged to a 96.5% win rate for the on policy player. In the advanced training setting, both players followed their own policy and win rate stayed consistently between 45%-55% during training. After 10 million simulated games, the resulting AI player could reliably beat human opponents.
+Utilizing the standard training protocol against a random opponent converged to a 96.5% win rate for the on policy player. In the advanced training setting, both players followed their own policy and win rate stayed consistently between 45%-55% during training. After 10 million simulated games, the resulting AI player could reliably beat untrained human opponents and consistently draw with skilled players.
 
 ## Contributors
 
