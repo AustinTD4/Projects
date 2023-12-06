@@ -66,7 +66,7 @@ Create a version of the game where the opponent followis its own policy to maxim
 
 ```python
 connectFourAdvanced = gameBoard(advancedTrain=True)
-connectFourAdvanced.explore(10000000, f'{filename}_Advanced', previousPolicy='{filename}', exploitativeSampling=True)
+connectFourAdvanced.explore(10000000, f'{filename}_Advanced')
 ```
 
 ## Results
