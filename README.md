@@ -2,16 +2,7 @@
 
 This repository is a collection of my various projects, showcasing my skills and interests in Machine Learning, AI, game development, and more. Each project in this repository demonstrates a unique aspect of my abilities and knowledge in these fields.
 
-## Table of Contents
-
-- [Machine Learning for the Quantified Self](#machine-learning-for-the-quantified-self)
-- [BlackJack Strategy Tutor](#blackjack-strategy-tutor)
-- [Evolutionary Algorithm Framework for Evoman](#evolutionary-algorithm-framework-for-evoman)
-- [Connect Four AI with Monte Carlo Tree Search](#connect-four-ai-with-monte-carlo-tree-search)
-
----
-
-## Machine Learning for the Quantified Self
+## Activity Classification and Cadence Estimation
 This project focuses on activity recognition and cadence prediction using machine learning techniques on accelerometer and gyroscope data. It's a collaborative effort that involved data gathering, labeling, and employing various ML models.
 
 - **Duration**: 4 weeks
