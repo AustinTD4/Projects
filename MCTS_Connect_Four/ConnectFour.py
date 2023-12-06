@@ -478,9 +478,9 @@ if __name__ == '__main__':
 
     # Train two agents acting on their own policies against each other
     connectFourAdvanced = gameBoard(advancedTrain=True)
-    connectFourAdvanced.explore(10000000, 'Test_Advanced_(10M)')
+    connectFourAdvanced.explore(10000000, 'Test_(10M)_Advanced')
 
-    connectFourAdvanced.visualizePerformance('Test_Advanced_(10M)')
+    connectFourAdvanced.visualizePerformance('Test_(10M)_Advanced')
 
     # Test against a person
     connectFourAdvanced.humanPlay('Test_Advanced_(10M)')
