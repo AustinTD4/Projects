@@ -1,5 +1,5 @@
 #######################################
-#   MCTS, Connect Four                #
+#   DPRL Assignment 3, Connect Four   #
 #   Austin Dickerson                  #
 #######################################
 from clockManager import clockManager
@@ -48,10 +48,11 @@ class gameBoard():
                 self.boardStates = pickle.load(file)
 
         if self.advancedTrain: # Use previous policy for opponent in training to develop more advanced policy
-            with open(f'{previousPolicy}.pkl', 'rb') as file:
-                self.boardStates = pickle.load(file)
-            with open(f'{previousPolicy}.pkl', 'rb') as file:
-                self.boardStates2 = pickle.load(file)
+            try:
+                with open(f'{previousPolicy}.pickle', 'rb') as file:
+                    self.boardStates = pickle.load(file)
+            except Exception as e:
+                print("Starting From Scratch")
 
         self.filename = filename
         self.iters = iters
@@ -69,8 +70,9 @@ class gameBoard():
 
     # 
     def humanPlay(self, filename):
+        self.testPhase=False
         self.human = True
-        self.initializeGameState(filename)
+        self.initializeGameState(0, filename)
         while self.human:
             self.newGame()
 
@@ -95,8 +97,8 @@ class gameBoard():
     # Explore using UTC algorithm
     def explore(self, iters, filename, previousPolicy=False, exploitativeSampling=False):
         self.exploring = True
-        self.exploitativeSampling = exploitativeSampling
         self.testPhase = False
+        self.exploitativeSampling = exploitativeSampling
         self.initializeGameState(iters, filename, previousPolicy)
 
         self.winsSample = 0
@@ -126,7 +128,6 @@ class gameBoard():
         self.gameState = [] # Tracks all columns moves, i.e. [*,*,*,*,*,*,*]
         self.winner = False
         self.onPolicyAction = True # Tracks when the learner is still on policy
-        self.onPolicySecond = True # Used when training against an on policy conputer
         self.newLeaf = False
         self.secondLeaf = False
         self.leafDepth =False   # Tracks the depth of the leaf from this run so the correct number of game states are updated 
@@ -175,7 +176,7 @@ class gameBoard():
             print(self.renderGameboard())
 
         # Calculate the UCT value for any child nodes
-        if (self.onPolicyAction and player == 1 and f'{self.boardMap}' in self.boardStates) or (self.onPolicySecond and player == 2 and f'{self.boardMap}' in self.boardStates2):
+        if self.onPolicyAction and f'{self.boardMap}' in self.boardStates:
 
             for i in range(7): # Create child nodes and search for the in the Monte Carlo Tree
                 node = copy.deepcopy(self.boardMap.copy())
@@ -187,19 +188,19 @@ class gameBoard():
                 nodeActions.append(i)
 
                 # Check if childrens node have been visited before
-                if (player == 1 and f'{node}' in self.boardStates) or (player == 2 and f'{node}' in self.boardStates2):
-
+                if f'{node}' in self.boardStates:
                     if player == 1:
-                        ratio = self.boardStates[f'{node}'].ratio 
-                        exploration = np.sqrt(2) * np.sqrt(np.log(self.boardStates[f'{self.boardMap}'].visits) / self.boardStates[f'{node}'].visits)
+                        ratio = self.boardStates[f'{node}'].ratio
                     else:
-                        ratio = 1-self.boardStates2[f'{node}'].ratio
+                        ratio = 1 - self.boardStates[f'{node}'].ratio
+
+                    exploration = np.sqrt(2) * np.sqrt(np.log(self.boardStates[f'{self.boardMap}'].visits) / self.boardStates[f'{node}'].visits)
 
                     # Only add the exploration term during training
-                    actionScore = ratio if self.testPhase or self.human or (self.onPolicySecond and player == 2) or (self.exploitativeSampling and self.sampling) or self.visualize else ratio + exploration
+                    actionScore = ratio if self.testPhase or self.human or (self.exploitativeSampling and self.sampling) or self.visualize else ratio + exploration
                     actionScores.append(actionScore)
 
-                elif self.testPhase or len(node[i]) > 6 or self.human or player == 2 or self.visualize or (self.exploitativeSampling and self.sampling):
+                elif self.testPhase or len(node[i]) > 6 or self.human or self.visualize or (self.exploitativeSampling and self.sampling):
                     actionScores.append(0)  # Don't explore infeasible moves, or while either testing or playing a human
                 else:
                     actionScores.append(99999)  # Greedy Optimism for unvisited nodes
@@ -237,8 +238,8 @@ class gameBoard():
 
     # Summarize and store last sampling run
     def sampleSummary(self):
-        winRate = self.winsSample/int(self.iters/1000)
-        print(f'{int(self.iters/1000)} samples with Win Rate: {winRate}')
+        winRate = self.winsSample/int(self.iters/10000)
+        print(f'{int(self.iters/10000)} samples with Win Rate: {winRate}')
         self.samplePerformance.append(winRate)
         self.winsSample = 0
         self.lossSample = 0
@@ -304,7 +305,7 @@ class gameBoard():
             print(f'\n{self.renderGameboard()}\n')
             choice = input("What will you do?")
         else:
-            print(f'Computer Played Row {self.choice+1} \n{self.renderGameboard()}\n')
+            print(f'{self.renderGameboard()}\n')
             choice = input("What will you do next?")
 
         try:
@@ -313,10 +314,10 @@ class gameBoard():
             choice = input("Try Again")
             choice = int(choice)
 
-        while self.gameBoard[0, choice] != 0:
+        while self.gameBoard[0, choice-1] != 0:
             choice = int(input("The last one was full, What will you do next?"))
 
-        self.completeMove(int(choice)-1, 2)
+        self.completeMove(choice-1, 2)
 
     # Computer Player selects Random action
     def randomTurn(self, player):
@@ -471,15 +472,15 @@ class gameBoard():
 if __name__ == '__main__':
     # Train the agent against a random computer
     connectFour = gameBoard()
-    connectFour.explore(10000000, 'Test12.4_(10M)', previousPolicy=False, exploitativeSampling=True)
+    connectFour.explore(10000000, 'Test_(10M)', previousPolicy=False, exploitativeSampling=True)
 
-    connectFour.visualizePerformance('Test12.4_(10M)')
+    connectFour.visualizePerformance('Test_(10M)')
 
-    # Continue training for one agent, and use the previously developed behavior as an opponent
+    # Train two agents acting on their own policies against each other
     connectFourAdvanced = gameBoard(advancedTrain=True)
-    connectFourAdvanced.explore(10000000, 'Test12.4_Advanced_(10M)', previousPolicy='Test12.4_(10M)', exploitativeSampling=True)
+    connectFourAdvanced.explore(10000000, 'Test_Advanced_(10M)')
 
-    connectFourAdvanced.visualizePerformance('Test12.4_Advanced_(10M)')
+    connectFourAdvanced.visualizePerformance('Test_Advanced_(10M)')
 
     # Test against a person
-    connectFour.humanPlay('Test12.4_Advanced_(10M)')
+    connectFourAdvanced.humanPlay('Test_Advanced_(10M)')
