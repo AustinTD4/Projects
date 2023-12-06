@@ -11,6 +11,7 @@ This project implements a Connect Four game AI using Monte Carlo Tree Search (MC
   - Human vs AI Gameplay
   - Visualizing Performance
   - Advanced Train
+- Results
 - Contributors
 
 ## Installation
@@ -61,12 +62,16 @@ connectFour.visualizePerformance('{filename}')
 
 ### Advanced Train
 
-Create a version of the game where the opponent used to train against is playing with a previously developed AI:
+Create a version of the game where the opponent followis its own policy to maximize reward and also makes exploratory decisions:
 
 ```python
 connectFourAdvanced = gameBoard(advancedTrain=True)
 connectFourAdvanced.explore(10000000, f'{filename}_Advanced', previousPolicy='{filename}', exploitativeSampling=True)
 ```
+
+## Results
+
+Utilizing the standard training protocol against a random opponent converged to a 96.5% win rate for the on policy player. In the advanced training setting, both players followed their own policy anbd win rate stayed consistently between 45%-55% during training. After 10 million simulated games, the resulting AI player could reliably beat human opponents.
 
 ## Contributors
 
