@@ -1,5 +1,5 @@
 ##################################################
-#    A Simple tool for tracking compute times    #
+#    A Simple Tool for Tracking Compute Times    #
 #    By Austin Dickerson                         #
 ##################################################
 
