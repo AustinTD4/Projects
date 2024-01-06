@@ -97,22 +97,22 @@ class blackjack_color():
         #Searches the available cards to see if there are any left of the chosen type
         found = False
         place = 0
-        while found == False and place < deck_num:
+        while not found and place < deck_num:
             for i in range(4):
-                if found == False:
+                if not found:
                     if self.deck_stack[place][index][i] == 1:
                         self.deck_stack[place][index][i] = 0 
                         found = True
             place += 1    
 
         #Chooses a new card if none were found previously        
-        if found == False:
+        if not found:
             recursion = self.generate_card(name, key, maximum, deck_num)
             return recursion
         else:
-            if name == False and key == False: 
+            if not name and not key: 
                 return value
-            elif key == False: 
+            elif not key: 
                 return value, card
             else: 
                 return value, card, index
@@ -158,7 +158,7 @@ class blackjack_color():
                 aces+=1  
 
         #Checks the game state to modify relevant variables
-        if pair==True: 
+        if pair: 
             return       
         while self.player_total > 21: 
             self.player_total -= 10     
