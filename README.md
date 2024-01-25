@@ -7,14 +7,14 @@ This project focuses on activity recognition and cadence prediction using machin
 
 - **Duration**: 4 weeks
 - **Skills Demonstrated**: Machine Learning, Feature Engineering, Data Analysis
-- **Technologies Used**: Python, PCA, Kalman Filter, Fourier Transformations, Temporal Convolutional Networks
+- **Technologies**: Python, PCA, Kalman Filter, Fourier Transformations, Temporal Convolutional Networks
 
 ---
 
 ## BlackJack Strategy Tutor
 A program designed to help players improve their BlackJack strategy through an interactive web-based game. It provides real-time feedback and allows players to practice specific scenarios.
 
-- **Technologies Used**: Python, Flask, JSON, HTML
+- **Technologies**: Python, Flask, JSON, HTML
 - **Features**: Interactive gameplay, strategy assessment, customizable scenarios
 
 ---
@@ -31,7 +31,6 @@ This framework develops neural network parameters through various evolutionary s
 An implementation of a Connect Four AI using Monte Carlo Tree Search. This project includes modes for AI training, testing, human vs AI gameplay, and performance visualization.
 
 - **Highlights**: AI training and testing, human vs AI gameplay
-- **Technologies Used**: Python, Monte Carlo Tree Search
 
 ---
 
