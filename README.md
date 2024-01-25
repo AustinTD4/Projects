@@ -39,4 +39,4 @@ An implementation of a Connect Four AI using Monte Carlo Tree Search. This proje
 
 ---
 
-Thank you for visiting my projects repository. Each project in this repository reflects my commitment to learning and growth in the fields of Machine Learning and Software Engineering. Explore each project's individual README for more detailed information.
+Each project in this repository reflects my commitment to learning and growth in the fields of Machine Learning and Software Engineering. Explore each project's individual README for more detailed information.
