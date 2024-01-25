@@ -54,6 +54,14 @@ Test_Selection_Recombination_Mutation.py
 - **evoman**: Contains the environment and dependencies for evoman, a game based on Megaman, designed in pygame by VU faculty.
 - **experiments_evoman**: Contains csv files with the experiment results.
 
+## Robobo Evolutionary Algorithm Controller
+
+This Framework was adapted to develop Genetic Algorithms which control an IRobobo hardware robot. The training process used CappeliaSim to develop Evolutionary Algorithms that allowed the IRobobo to complete tasks, which were tested on hardware IRobobo machines. The primary tasks were collecting "Food" objects, and pushing objects to a location. The IRobobo has 8 Infra-Red Sensors and a mounted camera to survey the environment.
+
+### Files
+
+- **Robobo_Controller_EA**: This file contains the algorithms for trainign the robot.
+
 ## Framework
 
 This framework is designed for modularity, making it adaptable beyond Evoman. To employ this framework for other applications:
