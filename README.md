@@ -19,6 +19,11 @@ A program designed to help players improve their BlackJack strategy through an i
 
 ---
 
+## Chess ML
+A chess game programmed for Pygame that facilitates Player vs. Player, and Player vs. Computer options. 
+
+---
+
 ## Evolutionary Algorithm Framework for Evoman and IRobobo
 This framework develops neural network parameters through various evolutionary strategies and the experiments within showcase the application of evolutionary algorithms in real-time environments. These Algorithms were used to develop a computer player for the game Evoman, based on Megaman. They eres also used to develop a controller agent for a hardware Robot, it completed real world tasks such as gathering food and transporting objects to an objective.
 
