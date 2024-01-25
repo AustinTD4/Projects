@@ -1,13 +1,13 @@
 # Austin Dickerson's Projects
 
-This repository is a collection of my various projects, showcasing my skills and interests in Machine Learning, AI, game development, and more. Each project in this repository demonstrates a unique aspect of my abilities and knowledge in these fields.
+This repository is a collection of my various projects, showcasing my skills and interests in Machine Learning, Evolutionary Algorithms, game development, and more. Each project in this repository demonstrates a unique aspect of my abilities and knowledge in these fields.
 
 ## Activity Classification and Cadence Estimation
 This project focuses on activity recognition and cadence prediction using machine learning techniques on accelerometer and gyroscope data. It's a collaborative effort that involved data gathering, labeling, and employing various ML models.
 
 - **Duration**: 4 weeks
 - **Skills Demonstrated**: Machine Learning, Feature Engineering, Data Analysis
-- **Technologies Used**: Python, PCA, Kalman Filter, Fourier Transformations, Neural Networks
+- **Technologies Used**: Python, PCA, Kalman Filter, Fourier Transformations, Temporal Convolutional Networks
 
 ---
 
@@ -20,9 +20,9 @@ A program designed to help players improve their BlackJack strategy through an i
 ---
 
 ## Evolutionary Algorithm Framework for Evoman and IRobobo
-This framework develops neural network parameters through various evolutionary strategies. It showcases the application of evolutionary algorithms in real-time environments. This framwork was used to develop a computer player for the game Evoman, based on Megaman. The Framework was also used to develop a controller for a hardware Robot, it completed real world tasks such as gathering food and transporting objects to an objective.
+This framework develops neural network parameters through various evolutionary strategies and the experiments within showcase the application of evolutionary algorithms in real-time environments. These Algorithms were used to develop a computer player for the game Evoman, based on Megaman. They eres also used to develop a controller agent for a hardware Robot, it completed real world tasks such as gathering food and transporting objects to an objective.
 
-- **Application**: Adaptable for any environment mapping actions to Neural Networks
+- **Application**: Adaptable for any environment mapping Neural Network outputs to predictions or maximization
 - **Key Features**: Multiple evolutionary strategies, experimentation with neural network parameters
 
 ---
