@@ -20,7 +20,7 @@ A program designed to help players improve their BlackJack strategy through an i
 ---
 
 ## Evolutionary Algorithm Framework for Evoman and IRobobo
-This framework utilizes the Pygame framework for Evoman to develop neural network parameters through various evolutionary strategies. It showcases the application of evolutionary algorithms in real-time environments.
+This framework develops neural network parameters through various evolutionary strategies. It showcases the application of evolutionary algorithms in real-time environments. This framwork was used to develop a computer player for the game Evoman, based on Megaman. The Framework was also used to develop a controller for a hardware Robot, it completed real world tasks such as gathering food and transporting objects to an objective.
 
 - **Application**: Adaptable for any environment mapping actions to Neural Networks
 - **Key Features**: Multiple evolutionary strategies, experimentation with neural network parameters
