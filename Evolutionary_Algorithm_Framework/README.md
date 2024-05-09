@@ -60,7 +60,7 @@ This Framework was adapted to develop Genetic Algorithms which control an IRobob
 
 ### Files
 
-- **Robobo_Controller_EA**: This file contains the algorithms for trainign the robot.
+- **Robobo_Controller_EA**: This file contains the algorithms for training the robot.
 
 ## Framework
 
