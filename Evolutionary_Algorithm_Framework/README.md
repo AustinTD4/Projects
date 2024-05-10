@@ -1,4 +1,4 @@
-# Evolutionary Algorithm Framework for Evoman, By Austin Dickerson
+# Evolutionary Algorithm Framework for Evoman/IRobobo, By Austin Dickerson
 
 The program leverages the Pygame Framework for Evoman, a rendition of the popular Megaman game. The primary objective of the framework is to develop sets of parameters tailored for neural networks, facilitating experiments using a multitude of strategies for Selection, Mutation, and Survival. 
 
